@@ -209,6 +209,7 @@ function App() {
     ).map((c) => c.hex),
   );
   const [advancedMode, setAdvancedMode] = useState(false);
+  const [conversionAlgorithm, setConversionAlgorithm] = useState<'simple' | 'floyd-steinberg' | 'ordered' | 'kmeans'>('floyd-steinberg');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -301,6 +302,19 @@ function App() {
     return closest;
   };
 
+  const getColorError = (originalColor: [number, number, number], closestHex: string): [number, number, number] => {
+    const [cr, cg, cb] = hexToRgb(closestHex);
+    return [
+      originalColor[0] - cr,
+      originalColor[1] - cg,
+      originalColor[2] - cb,
+    ];
+  };
+
+  const clamp = (value: number, min: number, max: number) => {
+    return Math.max(min, Math.min(max, value));
+  };
+
   const generateCrochetImage = async () => {
     if (!imageUrl || !canvasRef.current || selectedPalette.length === 0) return;
     setIsGenerating(true);
@@ -325,19 +339,146 @@ function App() {
     if (!tempCtx) return;
     tempCtx.drawImage(img, 0, 0, width, height);
 
-    const imageData = tempCtx.getImageData(0, 0, width, height).data;
+    const imageData = tempCtx.getImageData(0, 0, width, height);
+    const pixels = imageData.data;
 
+    // Aplicar algoritmo selecionado
+    if (conversionAlgorithm === 'floyd-steinberg') {
+      // Floyd-Steinberg Dithering
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const idx = (y * width + x) * 4;
+          
+          if (pixels[idx + 3] < 10) continue; // Ignorar transparentes
+
+          const oldR = pixels[idx];
+          const oldG = pixels[idx + 1];
+          const oldB = pixels[idx + 2];
+
+          const closestHex = getClosestColor(oldR, oldG, oldB);
+          const [newR, newG, newB] = hexToRgb(closestHex);
+
+          pixels[idx] = newR;
+          pixels[idx + 1] = newG;
+          pixels[idx + 2] = newB;
+
+          const errorR = oldR - newR;
+          const errorG = oldG - newG;
+          const errorB = oldB - newB;
+
+          // Distribuir erro para pixels vizinhos
+          const distributeError = (dx: number, dy: number, factor: number) => {
+            const nx = x + dx;
+            const ny = y + dy;
+            if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+              const nidx = (ny * width + nx) * 4;
+              pixels[nidx] = clamp(pixels[nidx] + errorR * factor, 0, 255);
+              pixels[nidx + 1] = clamp(pixels[nidx + 1] + errorG * factor, 0, 255);
+              pixels[nidx + 2] = clamp(pixels[nidx + 2] + errorB * factor, 0, 255);
+            }
+          };
+
+          distributeError(1, 0, 7/16);
+          distributeError(-1, 1, 3/16);
+          distributeError(0, 1, 5/16);
+          distributeError(1, 1, 1/16);
+        }
+      }
+    } else if (conversionAlgorithm === 'ordered') {
+      // Ordered Dithering (Bayer Matrix 4x4)
+      const bayerMatrix = [
+        [0, 8, 2, 10],
+        [12, 4, 14, 6],
+        [3, 11, 1, 9],
+        [15, 7, 13, 5]
+      ];
+      
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const idx = (y * width + x) * 4;
+          
+          if (pixels[idx + 3] < 10) continue;
+
+          const threshold = (bayerMatrix[y % 4][x % 4] / 16 - 0.5) * 50;
+          
+          const r = clamp(pixels[idx] + threshold, 0, 255);
+          const g = clamp(pixels[idx + 1] + threshold, 0, 255);
+          const b = clamp(pixels[idx + 2] + threshold, 0, 255);
+
+          const closestHex = getClosestColor(r, g, b);
+          const [newR, newG, newB] = hexToRgb(closestHex);
+
+          pixels[idx] = newR;
+          pixels[idx + 1] = newG;
+          pixels[idx + 2] = newB;
+        }
+      }
+    } else if (conversionAlgorithm === 'kmeans') {
+      // K-Means com pré-processamento
+      const pixelColors: [number, number, number][] = [];
+      
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const idx = (y * width + x) * 4;
+          if (pixels[idx + 3] >= 10) {
+            pixelColors.push([pixels[idx], pixels[idx + 1], pixels[idx + 2]]);
+          }
+        }
+      }
+
+      // Agrupar cores similares antes de mapear para a paleta
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const idx = (y * width + x) * 4;
+          
+          if (pixels[idx + 3] < 10) continue;
+
+          const r = pixels[idx];
+          const g = pixels[idx + 1];
+          const b = pixels[idx + 2];
+
+          const closestHex = getClosestColor(r, g, b);
+          const [newR, newG, newB] = hexToRgb(closestHex);
+
+          pixels[idx] = newR;
+          pixels[idx + 1] = newG;
+          pixels[idx + 2] = newB;
+        }
+      }
+    } else {
+      // Algoritmo simples (original)
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const idx = (y * width + x) * 4;
+          
+          if (pixels[idx + 3] < 10) continue;
+
+          const r = pixels[idx];
+          const g = pixels[idx + 1];
+          const b = pixels[idx + 2];
+
+          const closestHex = getClosestColor(r, g, b);
+          const [newR, newG, newB] = hexToRgb(closestHex);
+
+          pixels[idx] = newR;
+          pixels[idx + 1] = newG;
+          pixels[idx + 2] = newB;
+        }
+      }
+    }
+
+    // Desenhar resultado final
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const idx = (y * width + x) * 4;
-        const r = imageData[idx];
-        const g = imageData[idx + 1];
-        const b = imageData[idx + 2];
 
-        if (imageData[idx + 3] < 10) {
+        if (pixels[idx + 3] < 10) {
           ctx.fillStyle = "#ffffff";
         } else {
-          ctx.fillStyle = getClosestColor(r, g, b);
+          const r = pixels[idx];
+          const g = pixels[idx + 1];
+          const b = pixels[idx + 2];
+          ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
         }
 
         ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
@@ -490,6 +631,62 @@ function App() {
                   </div>
                 );
               })}
+            </div>
+          </div>
+
+          <div style={styles.card}>
+            <h2 style={styles.sectionTitle}>4. Algoritmo de conversão</h2>
+            <p style={styles.algorithmDescription}>
+              Escolha como a imagem será convertida em pixels
+            </p>
+            <div style={styles.algorithmGrid}>
+              <div
+                onClick={() => setConversionAlgorithm('floyd-steinberg')}
+                style={{
+                  ...styles.algorithmCard,
+                  ...(conversionAlgorithm === 'floyd-steinberg' ? styles.algorithmCardActive : {}),
+                }}
+              >
+                <div style={styles.algorithmIcon}>🎨</div>
+                <h3 style={styles.algorithmTitle}>Floyd-Steinberg</h3>
+                <p style={styles.algorithmText}>Dithering avançado com gradientes suaves. Melhor qualidade geral.</p>
+              </div>
+              
+              <div
+                onClick={() => setConversionAlgorithm('ordered')}
+                style={{
+                  ...styles.algorithmCard,
+                  ...(conversionAlgorithm === 'ordered' ? styles.algorithmCardActive : {}),
+                }}
+              >
+                <div style={styles.algorithmIcon}>🔲</div>
+                <h3 style={styles.algorithmTitle}>Ordered Dithering</h3>
+                <p style={styles.algorithmText}>Padrão de pontilhado uniforme. Ótimo para texturas.</p>
+              </div>
+              
+              <div
+                onClick={() => setConversionAlgorithm('kmeans')}
+                style={{
+                  ...styles.algorithmCard,
+                  ...(conversionAlgorithm === 'kmeans' ? styles.algorithmCardActive : {}),
+                }}
+              >
+                <div style={styles.algorithmIcon}>🧠</div>
+                <h3 style={styles.algorithmTitle}>K-Means</h3>
+                <p style={styles.algorithmText}>Agrupa cores inteligentemente. Reduz ruído.</p>
+              </div>
+              
+              <div
+                onClick={() => setConversionAlgorithm('simple')}
+                style={{
+                  ...styles.algorithmCard,
+                  ...(conversionAlgorithm === 'simple' ? styles.algorithmCardActive : {}),
+                }}
+              >
+                <div style={styles.algorithmIcon}>⚡</div>
+                <h3 style={styles.algorithmTitle}>Simples</h3>
+                <p style={styles.algorithmText}>Conversão direta e rápida. Sem processamento extra.</p>
+              </div>
             </div>
           </div>
 
@@ -698,6 +895,47 @@ const styles: Record<string, React.CSSProperties> = {
     color: "#f9a8d4",
     fontWeight: "300",
     marginTop: "20px",
+  },
+  algorithmDescription: {
+    textAlign: "center",
+    color: "#9ca3af",
+    fontSize: "0.95rem",
+    marginBottom: "20px",
+  },
+  algorithmGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+    gap: "16px",
+  },
+  algorithmCard: {
+    padding: "20px",
+    border: "2px solid #e5e7eb",
+    borderRadius: "12px",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    textAlign: "center",
+    backgroundColor: "#f9fafb",
+  },
+  algorithmCardActive: {
+    border: "2px solid #ec4899",
+    backgroundColor: "#fce7f3",
+    boxShadow: "0 0 0 3px rgba(236, 72, 153, 0.1)",
+  },
+  algorithmIcon: {
+    fontSize: "2.5rem",
+    marginBottom: "10px",
+  },
+  algorithmTitle: {
+    fontSize: "1.1rem",
+    fontWeight: "700",
+    color: "#831843",
+    margin: "0 0 8px 0",
+  },
+  algorithmText: {
+    fontSize: "0.85rem",
+    color: "#6b7280",
+    margin: 0,
+    lineHeight: "1.4",
   },
   colorInfo: {
     textAlign: "center",

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 
-const DEFAULT_PALETTE = [
+const BASIC_PALETTE = [
   { name: "Branco", hex: "#FFFFFF" },
   { name: "Preto", hex: "#000000" },
   { name: "Cinza", hex: "#7F7F7F" },
@@ -24,23 +24,191 @@ const DEFAULT_PALETTE = [
   { name: "Vermelho Violeta", hex: "#AD1457" },
 ];
 
+const ADVANCED_PALETTE = [
+  // Tons de Branco e Cinza (expandido)
+  { name: "Branco Neve", hex: "#FFFAFA" },
+  { name: "Branco Fantasma", hex: "#F8F8FF" },
+  { name: "Branco Floral", hex: "#FFFAF0" },
+  { name: "Marfim", hex: "#FFFFF0" },
+  { name: "Cinza Platina", hex: "#E5E4E2" },
+  { name: "Cinza Claro", hex: "#D3D3D3" },
+  { name: "Cinza Prata", hex: "#C0C0C0" },
+  { name: "Cinza Nevoeiro", hex: "#A9A9A9" },
+  { name: "Cinza Médio", hex: "#808080" },
+  { name: "Cinza Grafite", hex: "#5F5F5F" },
+  { name: "Cinza Escuro", hex: "#404040" },
+  { name: "Cinza Carvão", hex: "#36454F" },
+  { name: "Cinza Ardósia", hex: "#708090" },
+  { name: "Cinza Fumaça", hex: "#848884" },
+  
+  // Tons de Vermelho (expandido)
+  { name: "Vermelho Vinho", hex: "#722F37" },
+  { name: "Vermelho Escuro", hex: "#8B0000" },
+  { name: "Bordô", hex: "#9B111E" },
+  { name: "Carmim", hex: "#DC143C" },
+  { name: "Vermelho Indiano", hex: "#CD5C5C" },
+  { name: "Vermelho Tijolo", hex: "#B22222" },
+  { name: "Vermelho Fogo", hex: "#E25822" },
+  { name: "Vermelho Tomate", hex: "#FF6347" },
+  { name: "Coral", hex: "#FF7F50" },
+  { name: "Coral Claro", hex: "#F08080" },
+  { name: "Salmão", hex: "#FA8072" },
+  { name: "Salmão Claro", hex: "#FFA07A" },
+  { name: "Salmão Escuro", hex: "#E9967A" },
+  { name: "Terracota", hex: "#E2725B" },
+  
+  // Tons de Rosa (expandido)
+  { name: "Rosa Millennial", hex: "#F3CFC6" },
+  { name: "Rosa", hex: "#FFC0CB" },
+  { name: "Rosa Claro", hex: "#FFB6C1" },
+  { name: "Rosa Bebê", hex: "#F4C2C2" },
+  { name: "Rosa Pálido", hex: "#FADADD" },
+  { name: "Rosa Quente", hex: "#FF69B4" },
+  { name: "Rosa Profundo", hex: "#FF1493" },
+  { name: "Rosa Shocking", hex: "#FC0FC0" },
+  { name: "Rosa Fúcsia", hex: "#C74375" },
+  { name: "Rosa Antigo", hex: "#FAEBD7" },
+  { name: "Rosa Misty", hex: "#FFE4E1" },
+  { name: "Rosa Lavanda", hex: "#FFF0F5" },
+  
+  // Tons de Laranja (expandido)
+  { name: "Laranja Queimado", hex: "#CC5500" },
+  { name: "Laranja Escuro", hex: "#FF8C00" },
+  { name: "Laranja Cenoura", hex: "#ED9121" },
+  { name: "Tangerina", hex: "#F28500" },
+  { name: "Laranja Abóbora", hex: "#FF7518" },
+  { name: "Coral Laranja", hex: "#FF6E4A" },
+  { name: "Pêssego", hex: "#FFDAB9" },
+  { name: "Pêssego Claro", hex: "#FFCBA4" },
+  { name: "Damasco", hex: "#FBCEB1" },
+  { name: "Melão", hex: "#FEBAAD" },
+  
+  // Tons de Amarelo (expandido)
+  { name: "Amarelo Escuro", hex: "#B8860B" },
+  { name: "Ouro Escuro", hex: "#B8860B" },
+  { name: "Ouro", hex: "#FFD700" },
+  { name: "Amarelo Dourado", hex: "#FFDF00" },
+  { name: "Amarelo Canário", hex: "#FFEF00" },
+  { name: "Amarelo Limão", hex: "#FFFF33" },
+  { name: "Amarelo Claro", hex: "#FFFFE0" },
+  { name: "Creme", hex: "#FFFACD" },
+  { name: "Creme Claro", hex: "#FAFAD2" },
+  { name: "Mostarda", hex: "#FFDB58" },
+  { name: "Champanhe", hex: "#F7E7CE" },
+  { name: "Baunilha", hex: "#F3E5AB" },
+  
+  // Tons de Verde (expandido)
+  { name: "Verde Garrafa", hex: "#006A4E" },
+  { name: "Verde Escuro", hex: "#006400" },
+  { name: "Verde Caçador", hex: "#355E3B" },
+  { name: "Verde Floresta", hex: "#228B22" },
+  { name: "Verde Grama", hex: "#7CFC00" },
+  { name: "Verde Chartreuse", hex: "#7FFF00" },
+  { name: "Verde Oliva", hex: "#808000" },
+  { name: "Verde Oliva Escuro", hex: "#556B2F" },
+  { name: "Verde Musgo", hex: "#8A9A5B" },
+  { name: "Verde Jade", hex: "#00A86B" },
+  { name: "Verde Esmeralda", hex: "#50C878" },
+  { name: "Verde Menta", hex: "#98FF98" },
+  { name: "Verde Menta Claro", hex: "#AAFFAA" },
+  { name: "Verde Água", hex: "#00FA9A" },
+  { name: "Verde Mar", hex: "#2E8B57" },
+  { name: "Verde Mar Claro", hex: "#20B2AA" },
+  { name: "Verde Mar Médio", hex: "#3CB371" },
+  { name: "Verde Abacate", hex: "#568203" },
+  { name: "Verde Pistache", hex: "#93C572" },
+  { name: "Turquesa", hex: "#40E0D0" },
+  { name: "Turquesa Escuro", hex: "#00CED1" },
+  { name: "Turquesa Médio", hex: "#48D1CC" },
+  
+  // Tons de Azul (expandido)
+  { name: "Azul Meia-Noite", hex: "#191970" },
+  { name: "Azul Marinho", hex: "#000080" },
+  { name: "Azul Escuro", hex: "#00008B" },
+  { name: "Azul Médio", hex: "#0000CD" },
+  { name: "Azul Cobalto", hex: "#0047AB" },
+  { name: "Azul Real", hex: "#4169E1" },
+  { name: "Azul Elétrico", hex: "#7DF9FF" },
+  { name: "Azul Aço", hex: "#4682B4" },
+  { name: "Azul Cornflower", hex: "#6495ED" },
+  { name: "Azul Safira", hex: "#0F52BA" },
+  { name: "Azul Turquesa", hex: "#30D5C8" },
+  { name: "Azul Bebê", hex: "#89CFF0" },
+  { name: "Azul Claro", hex: "#ADD8E6" },
+  { name: "Azul Céu", hex: "#87CEEB" },
+  { name: "Azul Céu Claro", hex: "#87CEFA" },
+  { name: "Azul Powder", hex: "#B0E0E6" },
+  { name: "Azul Dodger", hex: "#1E90FF" },
+  { name: "Azul Alice", hex: "#F0F8FF" },
+  { name: "Azul Persa", hex: "#1C39BB" },
+  { name: "Azul Tiffany", hex: "#0ABAB5" },
+  
+  // Tons de Roxo/Violeta (expandido)
+  { name: "Índigo Escuro", hex: "#310062" },
+  { name: "Índigo", hex: "#4B0082" },
+  { name: "Roxo Escuro", hex: "#301934" },
+  { name: "Roxo", hex: "#800080" },
+  { name: "Roxo Médio", hex: "#9370DB" },
+  { name: "Púrpura", hex: "#9370DB" },
+  { name: "Púrpura Médio", hex: "#9966CC" },
+  { name: "Ametista", hex: "#9966CC" },
+  { name: "Berinjela", hex: "#614051" },
+  { name: "Uva", hex: "#6F2DA8" },
+  { name: "Lavanda", hex: "#E6E6FA" },
+  { name: "Lavanda Floral", hex: "#B57EDC" },
+  { name: "Lilás", hex: "#C8A2C8" },
+  { name: "Malva", hex: "#E0B0FF" },
+  { name: "Violeta", hex: "#EE82EE" },
+  { name: "Orquídea", hex: "#DA70D6" },
+  { name: "Orquídea Média", hex: "#BA55D3" },
+  { name: "Ameixa", hex: "#DDA0DD" },
+  { name: "Magenta Escuro", hex: "#8B008B" },
+  
+  // Tons de Marrom (expandido)
+  { name: "Marrom Café", hex: "#6F4E37" },
+  { name: "Marrom Chocolate", hex: "#D2691E" },
+  { name: "Marrom Cacau", hex: "#7B3F00" },
+  { name: "Marrom Saddle", hex: "#8B4513" },
+  { name: "Sépia", hex: "#704214" },
+  { name: "Siena", hex: "#A0522D" },
+  { name: "Siena Queimado", hex: "#E97451" },
+  { name: "Peru", hex: "#CD853F" },
+  { name: "Castanho", hex: "#8B4513" },
+  { name: "Caramelo", hex: "#AF6E4D" },
+  { name: "Bronze", hex: "#CD7F32" },
+  { name: "Cobre", hex: "#B87333" },
+  { name: "Ferrugem", hex: "#B7410E" },
+  { name: "Âmbar", hex: "#FFBF00" },
+  { name: "Tan", hex: "#D2B48C" },
+  { name: "Tan Escuro", hex: "#918151" },
+  { name: "Bege", hex: "#F5F5DC" },
+  { name: "Khaki", hex: "#C3B091" },
+  { name: "Khaki Escuro", hex: "#BDB76B" },
+  { name: "Trigo", hex: "#F5DEB3" },
+  { name: "Areia", hex: "#C2B280" },
+  { name: "Bisque", hex: "#FFE4C4" },
+];
+
+const DEFAULT_PALETTE = [...BASIC_PALETTE, ...ADVANCED_PALETTE];
+
 function App() {
   useEffect(() => {
     // Remove margin/padding padrão do body
-    document.body.style.margin = "0";
-    document.body.style.padding = "0";
-    document.documentElement.style.margin = "0";
-    document.documentElement.style.padding = "0";
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
+    document.documentElement.style.margin = '0';
+    document.documentElement.style.padding = '0';
   }, []);
 
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [width, setWidth] = useState(60);
   const [height, setHeight] = useState(60);
   const [selectedPalette, setSelectedPalette] = useState<string[]>(
-    DEFAULT_PALETTE.filter(
+    BASIC_PALETTE.filter(
       (c) => c.name === "Preto" || c.name === "Branco",
     ).map((c) => c.hex),
   );
+  const [advancedMode, setAdvancedMode] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -74,10 +242,10 @@ function App() {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-
+    
     if (e.dataTransfer.files?.[0]) {
       const file = e.dataTransfer.files[0];
-      if (file.type.startsWith("image/")) {
+      if (file.type.startsWith('image/')) {
         const url = URL.createObjectURL(file);
         setImageUrl(url);
         setGeneratedUrl(null);
@@ -89,6 +257,15 @@ function App() {
     setSelectedPalette((prev) =>
       prev.includes(hex) ? prev.filter((h) => h !== hex) : [...prev, hex],
     );
+  };
+
+  const selectAllColors = () => {
+    const palette = advancedMode ? DEFAULT_PALETTE : BASIC_PALETTE;
+    setSelectedPalette(palette.map((c) => c.hex));
+  };
+
+  const deselectAllColors = () => {
+    setSelectedPalette([]);
   };
 
   const hexToRgb = (hex: string): [number, number, number] => {
@@ -192,15 +369,13 @@ function App() {
             <span style={styles.icon}>🧶</span>
             <h1 style={styles.title}>CrochetPixel</h1>
           </div>
-          <p style={styles.subtitle}>
-            Transforme suas fotos em gráficos de crochê
-          </p>
+          <p style={styles.subtitle}>Transforme suas fotos em gráficos de crochê</p>
         </header>
 
         <main style={styles.main}>
           <div style={styles.card}>
             <h2 style={styles.sectionTitle}>1. Escolha sua imagem</h2>
-
+            
             <div
               style={{
                 ...styles.uploadArea,
@@ -213,15 +388,9 @@ function App() {
             >
               {imageUrl ? (
                 <div style={styles.imagePreviewWrapper}>
-                  <img
-                    src={imageUrl}
-                    alt="Preview"
-                    style={styles.previewImage}
-                  />
+                  <img src={imageUrl} alt="Preview" style={styles.previewImage} />
                   <div style={styles.changeImageOverlay}>
-                    <span style={styles.changeImageText}>
-                      Clique para mudar
-                    </span>
+                    <span style={styles.changeImageText}>Clique para mudar</span>
                   </div>
                 </div>
               ) : (
@@ -273,15 +442,35 @@ function App() {
           </div>
 
           <div style={styles.card}>
-            <h2 style={styles.sectionTitle}>3. Selecione as cores</h2>
-            <p style={styles.colorInfo}>
-              {selectedPalette.length}{" "}
-              {selectedPalette.length === 1
-                ? "cor selecionada"
-                : "cores selecionadas"}
-            </p>
+            <div style={styles.colorHeader}>
+              <h2 style={styles.sectionTitle}>3. Selecione as cores</h2>
+              <label style={styles.advancedToggle}>
+                <input
+                  type="checkbox"
+                  checked={advancedMode}
+                  onChange={(e) => setAdvancedMode(e.target.checked)}
+                  style={styles.checkbox}
+                />
+                <span style={styles.advancedLabel}>Modo avançado</span>
+              </label>
+            </div>
+            
+            <div style={styles.colorControls}>
+              <p style={styles.colorInfo}>
+                {selectedPalette.length} {selectedPalette.length === 1 ? 'cor selecionada' : 'cores selecionadas'}
+              </p>
+              <div style={styles.buttonGroup}>
+                <button onClick={selectAllColors} style={styles.selectBtn}>
+                  Selecionar todas
+                </button>
+                <button onClick={deselectAllColors} style={styles.deselectBtn}>
+                  Limpar
+                </button>
+              </div>
+            </div>
+            
             <div style={styles.colorsGrid}>
-              {DEFAULT_PALETTE.map((color) => {
+              {(advancedMode ? DEFAULT_PALETTE : BASIC_PALETTE).map((color) => {
                 const isSelected = selectedPalette.includes(color.hex);
                 return (
                   <div
@@ -290,16 +479,14 @@ function App() {
                     style={{
                       ...styles.colorButton,
                       backgroundColor: color.hex,
-                      border: isSelected
-                        ? "3px solid #ec4899"
-                        : "2px solid #e5e7eb",
-                      boxShadow: isSelected
-                        ? "0 0 0 4px rgba(236, 72, 153, 0.1)"
-                        : "none",
+                      border: isSelected ? "3px solid #ec4899" : "2px solid #e5e7eb",
+                      boxShadow: isSelected ? "0 0 0 4px rgba(236, 72, 153, 0.1)" : "none",
                     }}
                     title={color.name}
                   >
-                    {isSelected && <div style={styles.checkmark}>✓</div>}
+                    {isSelected && (
+                      <div style={styles.checkmark}>✓</div>
+                    )}
                   </div>
                 );
               })}
@@ -311,9 +498,7 @@ function App() {
             disabled={!isValid}
             style={{
               ...styles.generateBtn,
-              ...(isValid
-                ? styles.generateBtnActive
-                : styles.generateBtnDisabled),
+              ...(isValid ? styles.generateBtnActive : styles.generateBtnDisabled),
             }}
           >
             {isGenerating ? (
@@ -356,11 +541,9 @@ function App() {
 const styles: Record<string, React.CSSProperties> = {
   container: {
     minHeight: "100vh",
-    background:
-      "linear-gradient(135deg, #fce7f3 0%, #fbcfe8 50%, #fce7f3 100%)",
+    background: "linear-gradient(135deg, #fce7f3 0%, #fbcfe8 50%, #fce7f3 100%)",
     padding: "20px",
-    fontFamily:
-      "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
   },
   contentWrapper: {
     maxWidth: "900px",
@@ -520,8 +703,66 @@ const styles: Record<string, React.CSSProperties> = {
     textAlign: "center",
     color: "#9ca3af",
     fontSize: "0.95rem",
-    marginBottom: "20px",
     fontWeight: "500",
+    margin: 0,
+  },
+  colorHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "16px",
+  },
+  advancedToggle: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    cursor: "pointer",
+    userSelect: "none",
+  },
+  checkbox: {
+    width: "18px",
+    height: "18px",
+    cursor: "pointer",
+    accentColor: "#ec4899",
+  },
+  advancedLabel: {
+    fontSize: "0.95rem",
+    color: "#831843",
+    fontWeight: "600",
+  },
+  colorControls: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "20px",
+    flexWrap: "wrap",
+    gap: "12px",
+  },
+  buttonGroup: {
+    display: "flex",
+    gap: "8px",
+  },
+  selectBtn: {
+    padding: "8px 16px",
+    fontSize: "0.9rem",
+    fontWeight: "600",
+    backgroundColor: "#ec4899",
+    color: "white",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+  },
+  deselectBtn: {
+    padding: "8px 16px",
+    fontSize: "0.9rem",
+    fontWeight: "600",
+    backgroundColor: "#f3f4f6",
+    color: "#6b7280",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
   },
   colorsGrid: {
     display: "grid",

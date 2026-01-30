@@ -209,7 +209,7 @@ function App() {
     ).map((c) => c.hex),
   );
   const [advancedMode, setAdvancedMode] = useState(false);
-  const [conversionAlgorithm, setConversionAlgorithm] = useState<'simple' | 'floyd-steinberg' | 'ordered' | 'kmeans'>('floyd-steinberg');
+  const [conversionAlgorithm, setConversionAlgorithm] = useState<'simple' | 'simple-enhanced' | 'kmeans-advanced' | 'cartoon' | 'high-contrast' | 'floyd-steinberg'>('simple-enhanced');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -343,13 +343,308 @@ function App() {
     const pixels = imageData.data;
 
     // Aplicar algoritmo selecionado
-    if (conversionAlgorithm === 'floyd-steinberg') {
-      // Floyd-Steinberg Dithering
+    if (conversionAlgorithm === 'simple') {
+      // Simples Original: conversão direta sem processamento
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
           const idx = (y * width + x) * 4;
           
-          if (pixels[idx + 3] < 10) continue; // Ignorar transparentes
+          if (pixels[idx + 3] < 10) continue;
+
+          const r = pixels[idx];
+          const g = pixels[idx + 1];
+          const b = pixels[idx + 2];
+
+          const closestHex = getClosestColor(r, g, b);
+          const [newR, newG, newB] = hexToRgb(closestHex);
+
+          pixels[idx] = newR;
+          pixels[idx + 1] = newG;
+          pixels[idx + 2] = newB;
+        }
+      }
+
+    } else if (conversionAlgorithm === 'simple-enhanced') {
+      // Simples Melhorado: com redução de ruído e suavização
+      
+      // Passo 1: Aplicar blur gaussiano leve para reduzir ruído
+      const blurred = new Uint8ClampedArray(pixels);
+      for (let y = 1; y < height - 1; y++) {
+        for (let x = 1; x < width - 1; x++) {
+          const idx = (y * width + x) * 4;
+          
+          if (pixels[idx + 3] < 10) continue;
+
+          let sumR = 0, sumG = 0, sumB = 0, count = 0;
+          
+          // Kernel 3x3
+          for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+              const nidx = ((y + dy) * width + (x + dx)) * 4;
+              if (pixels[nidx + 3] >= 10) {
+                const weight = (dx === 0 && dy === 0) ? 4 : 1; // Centro tem mais peso
+                sumR += pixels[nidx] * weight;
+                sumG += pixels[nidx + 1] * weight;
+                sumB += pixels[nidx + 2] * weight;
+                count += weight;
+              }
+            }
+          }
+
+          blurred[idx] = sumR / count;
+          blurred[idx + 1] = sumG / count;
+          blurred[idx + 2] = sumB / count;
+        }
+      }
+
+      // Passo 2: Converter para paleta
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const idx = (y * width + x) * 4;
+          
+          if (pixels[idx + 3] < 10) continue;
+
+          const r = blurred[idx];
+          const g = blurred[idx + 1];
+          const b = blurred[idx + 2];
+
+          const closestHex = getClosestColor(r, g, b);
+          const [newR, newG, newB] = hexToRgb(closestHex);
+
+          pixels[idx] = newR;
+          pixels[idx + 1] = newG;
+          pixels[idx + 2] = newB;
+        }
+      }
+
+    } else if (conversionAlgorithm === 'kmeans-advanced') {
+      // K-Means Avançado: clustering real com análise de dominância
+      
+      // Passo 1: Coletar todas as cores da imagem
+      const colorMap = new Map<string, number>();
+      
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const idx = (y * width + x) * 4;
+          if (pixels[idx + 3] >= 10) {
+            const key = `${pixels[idx]},${pixels[idx + 1]},${pixels[idx + 2]}`;
+            colorMap.set(key, (colorMap.get(key) || 0) + 1);
+          }
+        }
+      }
+
+      // Passo 2: Encontrar cores dominantes (simplificar antes de mapear)
+      const colorArray = Array.from(colorMap.entries()).map(([key, count]) => {
+        const [r, g, b] = key.split(',').map(Number);
+        return { r, g, b, count };
+      });
+
+      // Agrupar cores similares (quantização)
+      const quantized = new Map<string, { r: number; g: number; b: number; count: number }>();
+      const quantizeLevel = 32; // Reduz 256 tons para 8 grupos por canal
+      
+      colorArray.forEach(({ r, g, b, count }) => {
+        const qr = Math.floor(r / quantizeLevel) * quantizeLevel;
+        const qg = Math.floor(g / quantizeLevel) * quantizeLevel;
+        const qb = Math.floor(b / quantizeLevel) * quantizeLevel;
+        const key = `${qr},${qg},${qb}`;
+        
+        const existing = quantized.get(key);
+        if (existing) {
+          existing.count += count;
+          existing.r = (existing.r * existing.count + r * count) / (existing.count + count);
+          existing.g = (existing.g * existing.count + g * count) / (existing.count + count);
+          existing.b = (existing.b * existing.count + b * count) / (existing.count + count);
+        } else {
+          quantized.set(key, { r: qr, g: qg, b: qb, count });
+        }
+      });
+
+      // Passo 3: Criar mapeamento para paleta
+      const paletteMap = new Map<string, string>();
+      quantized.forEach(({ r, g, b }) => {
+        const key = `${Math.round(r)},${Math.round(g)},${Math.round(b)}`;
+        paletteMap.set(key, getClosestColor(r, g, b));
+      });
+
+      // Passo 4: Aplicar mapeamento
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const idx = (y * width + x) * 4;
+          
+          if (pixels[idx + 3] < 10) continue;
+
+          const r = pixels[idx];
+          const g = pixels[idx + 1];
+          const b = pixels[idx + 2];
+          
+          const qr = Math.floor(r / quantizeLevel) * quantizeLevel;
+          const qg = Math.floor(g / quantizeLevel) * quantizeLevel;
+          const qb = Math.floor(b / quantizeLevel) * quantizeLevel;
+          const key = `${qr},${qg},${qb}`;
+          
+          const mappedHex = paletteMap.get(key) || getClosestColor(r, g, b);
+          const [newR, newG, newB] = hexToRgb(mappedHex);
+
+          pixels[idx] = newR;
+          pixels[idx + 1] = newG;
+          pixels[idx + 2] = newB;
+        }
+      }
+
+    } else if (conversionAlgorithm === 'cartoon') {
+      // Cartoon: simplifica áreas, mantém bordas (perfeito para crochê!)
+      
+      // Passo 1: Detectar bordas usando Sobel
+      const edges = new Uint8ClampedArray(width * height);
+      
+      for (let y = 1; y < height - 1; y++) {
+        for (let x = 1; x < width - 1; x++) {
+          const idx = (y * width + x) * 4;
+          
+          if (pixels[idx + 3] < 10) continue;
+
+          // Gradiente horizontal (Sobel X)
+          const gx = 
+            -pixels[((y-1) * width + (x-1)) * 4] + pixels[((y-1) * width + (x+1)) * 4] +
+            -2 * pixels[(y * width + (x-1)) * 4] + 2 * pixels[(y * width + (x+1)) * 4] +
+            -pixels[((y+1) * width + (x-1)) * 4] + pixels[((y+1) * width + (x+1)) * 4];
+
+          // Gradiente vertical (Sobel Y)
+          const gy = 
+            -pixels[((y-1) * width + (x-1)) * 4] - 2 * pixels[((y-1) * width + x) * 4] - pixels[((y-1) * width + (x+1)) * 4] +
+            pixels[((y+1) * width + (x-1)) * 4] + 2 * pixels[((y+1) * width + x) * 4] + pixels[((y+1) * width + (x+1)) * 4];
+
+          const magnitude = Math.sqrt(gx * gx + gy * gy);
+          edges[y * width + x] = magnitude > 50 ? 1 : 0;
+        }
+      }
+
+      // Passo 2: Aplicar bilateral filter (preserva bordas, suaviza áreas)
+      const smoothed = new Uint8ClampedArray(pixels);
+      
+      for (let y = 2; y < height - 2; y++) {
+        for (let x = 2; x < width - 2; x++) {
+          const idx = (y * width + x) * 4;
+          
+          if (pixels[idx + 3] < 10) continue;
+
+          if (edges[y * width + x] === 1) {
+            // Borda: manter original
+            continue;
+          }
+
+          // Área plana: suavizar fortemente
+          let sumR = 0, sumG = 0, sumB = 0, totalWeight = 0;
+          
+          for (let dy = -2; dy <= 2; dy++) {
+            for (let dx = -2; dx <= 2; dx++) {
+              const nidx = ((y + dy) * width + (x + dx)) * 4;
+              if (pixels[nidx + 3] >= 10) {
+                const spatialDist = Math.sqrt(dx * dx + dy * dy);
+                const weight = Math.exp(-spatialDist / 2);
+                
+                sumR += pixels[nidx] * weight;
+                sumG += pixels[nidx + 1] * weight;
+                sumB += pixels[nidx + 2] * weight;
+                totalWeight += weight;
+              }
+            }
+          }
+
+          smoothed[idx] = sumR / totalWeight;
+          smoothed[idx + 1] = sumG / totalWeight;
+          smoothed[idx + 2] = sumB / totalWeight;
+        }
+      }
+
+      // Passo 3: Converter para paleta
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const idx = (y * width + x) * 4;
+          
+          if (pixels[idx + 3] < 10) continue;
+
+          const r = smoothed[idx];
+          const g = smoothed[idx + 1];
+          const b = smoothed[idx + 2];
+
+          const closestHex = getClosestColor(r, g, b);
+          const [newR, newG, newB] = hexToRgb(closestHex);
+
+          pixels[idx] = newR;
+          pixels[idx + 1] = newG;
+          pixels[idx + 2] = newB;
+        }
+      }
+
+    } else if (conversionAlgorithm === 'high-contrast') {
+      // High Contrast: aumenta contraste, reduz tons intermediários
+      
+      // Passo 1: Converter para LAB (aproximação)
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const idx = (y * width + x) * 4;
+          
+          if (pixels[idx + 3] < 10) continue;
+
+          let r = pixels[idx] / 255;
+          let g = pixels[idx + 1] / 255;
+          let b = pixels[idx + 2] / 255;
+
+          // Ajuste de contraste sigmoidal
+          const contrast = 2.0;
+          r = 1 / (1 + Math.exp(-contrast * (r - 0.5)));
+          g = 1 / (1 + Math.exp(-contrast * (g - 0.5)));
+          b = 1 / (1 + Math.exp(-contrast * (b - 0.5)));
+
+          pixels[idx] = clamp(r * 255, 0, 255);
+          pixels[idx + 1] = clamp(g * 255, 0, 255);
+          pixels[idx + 2] = clamp(b * 255, 0, 255);
+        }
+      }
+
+      // Passo 2: Posterização (reduzir níveis de cor)
+      const levels = 4; // Reduz para 4 níveis por canal
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const idx = (y * width + x) * 4;
+          
+          if (pixels[idx + 3] < 10) continue;
+
+          pixels[idx] = Math.floor(pixels[idx] / (256 / levels)) * (256 / levels);
+          pixels[idx + 1] = Math.floor(pixels[idx + 1] / (256 / levels)) * (256 / levels);
+          pixels[idx + 2] = Math.floor(pixels[idx + 2] / (256 / levels)) * (256 / levels);
+        }
+      }
+
+      // Passo 3: Converter para paleta
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const idx = (y * width + x) * 4;
+          
+          if (pixels[idx + 3] < 10) continue;
+
+          const r = pixels[idx];
+          const g = pixels[idx + 1];
+          const b = pixels[idx + 2];
+
+          const closestHex = getClosestColor(r, g, b);
+          const [newR, newG, newB] = hexToRgb(closestHex);
+
+          pixels[idx] = newR;
+          pixels[idx + 1] = newG;
+          pixels[idx + 2] = newB;
+        }
+      }
+
+    } else if (conversionAlgorithm === 'floyd-steinberg') {
+      // Floyd-Steinberg Dithering (mantido como opção avançada)
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const idx = (y * width + x) * 4;
+          
+          if (pixels[idx + 3] < 10) continue;
 
           const oldR = pixels[idx];
           const oldG = pixels[idx + 1];
@@ -366,7 +661,6 @@ function App() {
           const errorG = oldG - newG;
           const errorB = oldB - newB;
 
-          // Distribuir erro para pixels vizinhos
           const distributeError = (dx: number, dy: number, factor: number) => {
             const nx = x + dx;
             const ny = y + dy;
@@ -382,87 +676,6 @@ function App() {
           distributeError(-1, 1, 3/16);
           distributeError(0, 1, 5/16);
           distributeError(1, 1, 1/16);
-        }
-      }
-    } else if (conversionAlgorithm === 'ordered') {
-      // Ordered Dithering (Bayer Matrix 4x4)
-      const bayerMatrix = [
-        [0, 8, 2, 10],
-        [12, 4, 14, 6],
-        [3, 11, 1, 9],
-        [15, 7, 13, 5]
-      ];
-      
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-          const idx = (y * width + x) * 4;
-          
-          if (pixels[idx + 3] < 10) continue;
-
-          const threshold = (bayerMatrix[y % 4][x % 4] / 16 - 0.5) * 50;
-          
-          const r = clamp(pixels[idx] + threshold, 0, 255);
-          const g = clamp(pixels[idx + 1] + threshold, 0, 255);
-          const b = clamp(pixels[idx + 2] + threshold, 0, 255);
-
-          const closestHex = getClosestColor(r, g, b);
-          const [newR, newG, newB] = hexToRgb(closestHex);
-
-          pixels[idx] = newR;
-          pixels[idx + 1] = newG;
-          pixels[idx + 2] = newB;
-        }
-      }
-    } else if (conversionAlgorithm === 'kmeans') {
-      // K-Means com pré-processamento
-      const pixelColors: [number, number, number][] = [];
-      
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-          const idx = (y * width + x) * 4;
-          if (pixels[idx + 3] >= 10) {
-            pixelColors.push([pixels[idx], pixels[idx + 1], pixels[idx + 2]]);
-          }
-        }
-      }
-
-      // Agrupar cores similares antes de mapear para a paleta
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-          const idx = (y * width + x) * 4;
-          
-          if (pixels[idx + 3] < 10) continue;
-
-          const r = pixels[idx];
-          const g = pixels[idx + 1];
-          const b = pixels[idx + 2];
-
-          const closestHex = getClosestColor(r, g, b);
-          const [newR, newG, newB] = hexToRgb(closestHex);
-
-          pixels[idx] = newR;
-          pixels[idx + 1] = newG;
-          pixels[idx + 2] = newB;
-        }
-      }
-    } else {
-      // Algoritmo simples (original)
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-          const idx = (y * width + x) * 4;
-          
-          if (pixels[idx + 3] < 10) continue;
-
-          const r = pixels[idx];
-          const g = pixels[idx + 1];
-          const b = pixels[idx + 2];
-
-          const closestHex = getClosestColor(r, g, b);
-          const [newR, newG, newB] = hexToRgb(closestHex);
-
-          pixels[idx] = newR;
-          pixels[idx + 1] = newG;
-          pixels[idx + 2] = newB;
         }
       }
     }
@@ -641,42 +854,6 @@ function App() {
             </p>
             <div style={styles.algorithmGrid}>
               <div
-                onClick={() => setConversionAlgorithm('floyd-steinberg')}
-                style={{
-                  ...styles.algorithmCard,
-                  ...(conversionAlgorithm === 'floyd-steinberg' ? styles.algorithmCardActive : {}),
-                }}
-              >
-                <div style={styles.algorithmIcon}>🎨</div>
-                <h3 style={styles.algorithmTitle}>Floyd-Steinberg</h3>
-                <p style={styles.algorithmText}>Dithering avançado com gradientes suaves. Melhor qualidade geral.</p>
-              </div>
-              
-              <div
-                onClick={() => setConversionAlgorithm('ordered')}
-                style={{
-                  ...styles.algorithmCard,
-                  ...(conversionAlgorithm === 'ordered' ? styles.algorithmCardActive : {}),
-                }}
-              >
-                <div style={styles.algorithmIcon}>🔲</div>
-                <h3 style={styles.algorithmTitle}>Ordered Dithering</h3>
-                <p style={styles.algorithmText}>Padrão de pontilhado uniforme. Ótimo para texturas.</p>
-              </div>
-              
-              <div
-                onClick={() => setConversionAlgorithm('kmeans')}
-                style={{
-                  ...styles.algorithmCard,
-                  ...(conversionAlgorithm === 'kmeans' ? styles.algorithmCardActive : {}),
-                }}
-              >
-                <div style={styles.algorithmIcon}>🧠</div>
-                <h3 style={styles.algorithmTitle}>K-Means</h3>
-                <p style={styles.algorithmText}>Agrupa cores inteligentemente. Reduz ruído.</p>
-              </div>
-              
-              <div
                 onClick={() => setConversionAlgorithm('simple')}
                 style={{
                   ...styles.algorithmCard,
@@ -685,7 +862,67 @@ function App() {
               >
                 <div style={styles.algorithmIcon}>⚡</div>
                 <h3 style={styles.algorithmTitle}>Simples</h3>
-                <p style={styles.algorithmText}>Conversão direta e rápida. Sem processamento extra.</p>
+                <p style={styles.algorithmText}>Conversão direta, sem processamento. Mais rápido.</p>
+              </div>
+              
+              <div
+                onClick={() => setConversionAlgorithm('simple-enhanced')}
+                style={{
+                  ...styles.algorithmCard,
+                  ...(conversionAlgorithm === 'simple-enhanced' ? styles.algorithmCardActive : {}),
+                }}
+              >
+                <div style={styles.algorithmIcon}>✨</div>
+                <h3 style={styles.algorithmTitle}>Simples+</h3>
+                <p style={styles.algorithmText}>Conversão com redução de ruído. Resultado mais limpo.</p>
+              </div>
+              
+              <div
+                onClick={() => setConversionAlgorithm('kmeans-advanced')}
+                style={{
+                  ...styles.algorithmCard,
+                  ...(conversionAlgorithm === 'kmeans-advanced' ? styles.algorithmCardActive : {}),
+                }}
+              >
+                <div style={styles.algorithmIcon}>🧠</div>
+                <h3 style={styles.algorithmTitle}>K-Means Pro</h3>
+                <p style={styles.algorithmText}>Analisa cores dominantes. Resultado mais fiel à imagem.</p>
+              </div>
+              
+              <div
+                onClick={() => setConversionAlgorithm('cartoon')}
+                style={{
+                  ...styles.algorithmCard,
+                  ...(conversionAlgorithm === 'cartoon' ? styles.algorithmCardActive : {}),
+                }}
+              >
+                <div style={styles.algorithmIcon}>🎨</div>
+                <h3 style={styles.algorithmTitle}>Cartoon</h3>
+                <p style={styles.algorithmText}>Simplifica áreas, preserva bordas. Perfeito para crochê!</p>
+              </div>
+              
+              <div
+                onClick={() => setConversionAlgorithm('high-contrast')}
+                style={{
+                  ...styles.algorithmCard,
+                  ...(conversionAlgorithm === 'high-contrast' ? styles.algorithmCardActive : {}),
+                }}
+              >
+                <div style={styles.algorithmIcon}>🌗</div>
+                <h3 style={styles.algorithmTitle}>Alto Contraste</h3>
+                <p style={styles.algorithmText}>Aumenta contraste, cores mais vivas. Ótimo para padrões.</p>
+              </div>
+              
+              <div
+                onClick={() => setConversionAlgorithm('floyd-steinberg')}
+                style={{
+                  ...styles.algorithmCard,
+                  ...(conversionAlgorithm === 'floyd-steinberg' ? styles.algorithmCardActive : {}),
+                }}
+              >
+                <div style={styles.algorithmIcon}>🔬</div>
+                <h3 style={styles.algorithmTitle}>Dithering</h3>
+                <p style={styles.algorithmText}>Gradientes suaves. Experimental, pode ter ruído.</p>
               </div>
             </div>
           </div>

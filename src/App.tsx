@@ -302,15 +302,6 @@ function App() {
     return closest;
   };
 
-  const getColorError = (originalColor: [number, number, number], closestHex: string): [number, number, number] => {
-    const [cr, cg, cb] = hexToRgb(closestHex);
-    return [
-      originalColor[0] - cr,
-      originalColor[1] - cg,
-      originalColor[2] - cb,
-    ];
-  };
-
   const clamp = (value: number, min: number, max: number) => {
     return Math.max(min, Math.min(max, value));
   };

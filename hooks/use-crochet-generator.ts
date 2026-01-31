@@ -8,6 +8,7 @@ import {
   DEFAULT_ALGORITHM,
   BASIC_COLORS,
   ADVANCED_COLORS,
+  DEFAULT_SELECTED_COLORS,
 } from '@/lib/constants'
 import { loadImageData, createCrochetChart, downloadCanvas } from '@/lib/utils/canvas'
 import { processImage } from '@/lib/algorithms'
@@ -18,7 +19,7 @@ export function useCrochetGenerator() {
   const [height, setHeight] = useState(DEFAULT_HEIGHT)
   const [advancedMode, setAdvancedMode] = useState(false)
   const [selectedPalette, setSelectedPalette] = useState<string[]>(
-    BASIC_COLORS.map(c => c.hex)
+    DEFAULT_SELECTED_COLORS
   )
   const [algorithm, setAlgorithm] = useState<ConversionAlgorithm>(DEFAULT_ALGORITHM)
   const [isGenerating, setIsGenerating] = useState(false)
@@ -54,9 +55,11 @@ export function useCrochetGenerator() {
   
   const handleAdvancedToggle = useCallback((enabled: boolean) => {
     setAdvancedMode(enabled)
-    // Reset selection when switching modes
-    const newPalette = enabled ? ADVANCED_COLORS : BASIC_COLORS
-    setSelectedPalette(newPalette.map(c => c.hex))
+    if (!enabled) {
+      setSelectedPalette(prev => 
+        prev.filter(hex => BASIC_COLORS.some(c => c.hex === hex))
+      )
+    }
   }, [])
   
   const generate = useCallback(async () => {

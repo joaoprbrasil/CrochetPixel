@@ -158,3 +158,4 @@ export const ADVANCED_COLORS: ColorEntry[] = [
 
 /** Default algorithm for new projects */
 export const DEFAULT_ALGORITHM = 'simple-enhanced' as const
+export const DEFAULT_SELECTED_COLORS = ['#000000', '#FFFFFF']

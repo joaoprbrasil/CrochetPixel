@@ -1,57 +1,65 @@
-import type { RGB } from '@/lib/types'
-
-/** Convert hex color to RGB tuple */
-export function hexToRgb(hex: string): RGB {
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  return [r, g, b]
+/**
+ * Converts a hex color string to RGB values
+ */
+export function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+  if (!result) {
+    return { r: 0, g: 0, b: 0 }
+  }
+  return {
+    r: Number.parseInt(result[1], 16),
+    g: Number.parseInt(result[2], 16),
+    b: Number.parseInt(result[3], 16),
+  }
 }
 
-/** Convert RGB to hex string */
+/**
+ * Converts RGB values to a hex color string
+ */
 export function rgbToHex(r: number, g: number, b: number): string {
-  return `#${[r, g, b].map(x => x.toString(16).padStart(2, '0')).join('')}`
+  return `#${[r, g, b].map(x => {
+    const hex = Math.max(0, Math.min(255, Math.round(x))).toString(16)
+    return hex.length === 1 ? `0${hex}` : hex
+  }).join('')}`
 }
 
-/** Clamp value between min and max */
-export function clamp(value: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, value))
+/**
+ * Calculates the Euclidean distance between two colors in RGB space
+ */
+export function colorDistance(hex1: string, hex2: string): number {
+  const c1 = hexToRgb(hex1)
+  const c2 = hexToRgb(hex2)
+  return Math.sqrt(
+    Math.pow(c1.r - c2.r, 2) +
+    Math.pow(c1.g - c2.g, 2) +
+    Math.pow(c1.b - c2.b, 2)
+  )
 }
 
-/** Find closest color from palette using perceptual distance */
-export function getClosestColor(r: number, g: number, b: number, palette: string[]): string {
-  if (palette.length === 0) return '#000000'
+/**
+ * Finds the closest color from a palette to the given color
+ */
+export function findClosestColor(hex: string, palette: string[]): string {
+  let closestColor = palette[0]
+  let minDistance = Number.POSITIVE_INFINITY
 
-  let minDistance = Infinity
-  let closest = palette[0]
-
-  for (const hex of palette) {
-    const [pr, pg, pb] = hexToRgb(hex)
-    
-    // Weighted Euclidean distance (redmean approximation)
-    const rMean = (r + pr) / 2
-    const dr = r - pr
-    const dg = g - pg
-    const db = b - pb
-
-    const distance = Math.sqrt(
-      (2 + rMean / 256) * dr * dr +
-      4 * dg * dg +
-      (2 + (255 - rMean) / 256) * db * db
-    )
-
+  for (const paletteColor of palette) {
+    const distance = colorDistance(hex, paletteColor)
     if (distance < minDistance) {
       minDistance = distance
-      closest = hex
+      closestColor = paletteColor
     }
   }
 
-  return closest
+  return closestColor
 }
 
-/** Check if a color is light (for contrast) */
+/**
+ * Determines if a color is light (for text contrast purposes)
+ */
 export function isLightColor(hex: string): boolean {
-  const [r, g, b] = hexToRgb(hex)
+  const { r, g, b } = hexToRgb(hex)
+  // Using relative luminance formula
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
   return luminance > 0.5
 }

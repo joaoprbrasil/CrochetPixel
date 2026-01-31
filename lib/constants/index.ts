@@ -1,113 +1,160 @@
-import type { ColorEntry, AlgorithmOption } from '@/lib/types'
+import type { ColorEntry } from '@/lib/types'
 
 // ============================================
 // DIMENSIONS
 // ============================================
-export const DEFAULT_WIDTH = 60
-export const DEFAULT_HEIGHT = 60
 export const MIN_DIMENSION = 5
 export const MAX_DIMENSION = 200
-export const BLOCK_SIZE = 10
+export const DEFAULT_WIDTH = 50
+export const DEFAULT_HEIGHT = 50
 
 // ============================================
-// ALGORITHMS
+// COLORS - BASIC PALETTE (21 colors)
 // ============================================
-export const ALGORITHM_OPTIONS: AlgorithmOption[] = [
-  { id: 'simple', name: 'Simples', icon: '⚡', description: 'Conversão direta, mais rápido' },
-  { id: 'simple-enhanced', name: 'Simples+', icon: '✨', description: 'Com redução de ruído' },
-  { id: 'kmeans-advanced', name: 'K-Means Pro', icon: '🧠', description: 'Analisa cores dominantes' },
-  { id: 'cartoon', name: 'Cartoon', icon: '🎨', description: 'Preserva bordas, ideal para crochê' },
-  { id: 'high-contrast', name: 'Alto Contraste', icon: '🌗', description: 'Cores mais vivas' },
-  { id: 'floyd-steinberg', name: 'Dithering', icon: '🔬', description: 'Gradientes suaves' },
+export const BASIC_COLORS: ColorEntry[] = [
+  { hex: '#FFFFFF', name: 'White' },
+  { hex: '#000000', name: 'Black' },
+  { hex: '#808080', name: 'Gray' },
+  { hex: '#C0C0C0', name: 'Silver' },
+  { hex: '#FF0000', name: 'Red' },
+  { hex: '#8B0000', name: 'Dark Red' },
+  { hex: '#FF6B6B', name: 'Light Red' },
+  { hex: '#FFA500', name: 'Orange' },
+  { hex: '#FFFF00', name: 'Yellow' },
+  { hex: '#FFD700', name: 'Gold' },
+  { hex: '#00FF00', name: 'Lime' },
+  { hex: '#008000', name: 'Green' },
+  { hex: '#90EE90', name: 'Light Green' },
+  { hex: '#00FFFF', name: 'Cyan' },
+  { hex: '#0000FF', name: 'Blue' },
+  { hex: '#000080', name: 'Navy' },
+  { hex: '#ADD8E6', name: 'Light Blue' },
+  { hex: '#800080', name: 'Purple' },
+  { hex: '#FF00FF', name: 'Magenta' },
+  { hex: '#FFC0CB', name: 'Pink' },
+  { hex: '#8B4513', name: 'Brown' },
 ]
 
-export const DEFAULT_ALGORITHM = 'simple-enhanced' as const
-
 // ============================================
-// COLOR PALETTES
+// COLORS - ADVANCED PALETTE (150+ colors)
 // ============================================
-export const BASIC_PALETTE: ColorEntry[] = [
-  { name: 'Branco', hex: '#FFFFFF' },
-  { name: 'Preto', hex: '#000000' },
-  { name: 'Cinza', hex: '#7F7F7F' },
-  { name: 'Marrom', hex: '#804000' },
-  { name: 'Vermelho', hex: '#FF0000' },
-  { name: 'Laranja', hex: '#FF8000' },
-  { name: 'Amarelo', hex: '#FFFF00' },
-  { name: 'Verde Lima', hex: '#7FFF00' },
-  { name: 'Verde', hex: '#00FF00' },
-  { name: 'Ciano', hex: '#00FFFF' },
-  { name: 'Azul', hex: '#0000FF' },
-  { name: 'Violeta', hex: '#7F00FF' },
-  { name: 'Magenta', hex: '#FF00FF' },
-  { name: 'Rosa', hex: '#FF0080' },
-  { name: 'Coral', hex: '#FF7F50' },
-  { name: 'Salmão', hex: '#FA8072' },
-  { name: 'Turquesa', hex: '#40E0D0' },
-  { name: 'Verde Mar', hex: '#2E8B57' },
-  { name: 'Azul Royal', hex: '#4169E1' },
-  { name: 'Índigo', hex: '#4B0082' },
-]
-
-export const ADVANCED_PALETTE: ColorEntry[] = [
-  // Whites & Grays
-  { name: 'Branco Neve', hex: '#FFFAFA' },
-  { name: 'Marfim', hex: '#FFFFF0' },
-  { name: 'Cinza Claro', hex: '#D3D3D3' },
-  { name: 'Cinza Prata', hex: '#C0C0C0' },
-  { name: 'Cinza Escuro', hex: '#404040' },
-  { name: 'Cinza Ardósia', hex: '#708090' },
+export const ADVANCED_COLORS: ColorEntry[] = [
+  ...BASIC_COLORS,
   // Reds
-  { name: 'Vermelho Vinho', hex: '#722F37' },
-  { name: 'Bordô', hex: '#9B111E' },
-  { name: 'Carmim', hex: '#DC143C' },
-  { name: 'Vermelho Tijolo', hex: '#B22222' },
-  { name: 'Terracota', hex: '#E2725B' },
-  // Pinks
-  { name: 'Rosa Bebê', hex: '#F4C2C2' },
-  { name: 'Rosa Quente', hex: '#FF69B4' },
-  { name: 'Rosa Profundo', hex: '#FF1493' },
-  { name: 'Fúcsia', hex: '#C74375' },
+  { hex: '#CD5C5C', name: 'Indian Red' },
+  { hex: '#F08080', name: 'Light Coral' },
+  { hex: '#FA8072', name: 'Salmon' },
+  { hex: '#E9967A', name: 'Dark Salmon' },
+  { hex: '#DC143C', name: 'Crimson' },
+  { hex: '#B22222', name: 'Fire Brick' },
   // Oranges
-  { name: 'Laranja Queimado', hex: '#CC5500' },
-  { name: 'Tangerina', hex: '#F28500' },
-  { name: 'Pêssego', hex: '#FFDAB9' },
-  { name: 'Damasco', hex: '#FBCEB1' },
+  { hex: '#FF7F50', name: 'Coral' },
+  { hex: '#FF6347', name: 'Tomato' },
+  { hex: '#FF4500', name: 'Orange Red' },
+  { hex: '#FF8C00', name: 'Dark Orange' },
   // Yellows
-  { name: 'Ouro', hex: '#FFD700' },
-  { name: 'Amarelo Canário', hex: '#FFEF00' },
-  { name: 'Creme', hex: '#FFFACD' },
-  { name: 'Mostarda', hex: '#FFDB58' },
-  { name: 'Baunilha', hex: '#F3E5AB' },
+  { hex: '#FAFAD2', name: 'Light Goldenrod' },
+  { hex: '#FFFFE0', name: 'Light Yellow' },
+  { hex: '#FFFACD', name: 'Lemon Chiffon' },
+  { hex: '#F0E68C', name: 'Khaki' },
+  { hex: '#BDB76B', name: 'Dark Khaki' },
   // Greens
-  { name: 'Verde Garrafa', hex: '#006A4E' },
-  { name: 'Verde Floresta', hex: '#228B22' },
-  { name: 'Verde Oliva', hex: '#808000' },
-  { name: 'Verde Jade', hex: '#00A86B' },
-  { name: 'Verde Esmeralda', hex: '#50C878' },
-  { name: 'Verde Menta', hex: '#98FF98' },
-  { name: 'Verde Pistache', hex: '#93C572' },
+  { hex: '#ADFF2F', name: 'Green Yellow' },
+  { hex: '#7FFF00', name: 'Chartreuse' },
+  { hex: '#32CD32', name: 'Lime Green' },
+  { hex: '#228B22', name: 'Forest Green' },
+  { hex: '#006400', name: 'Dark Green' },
+  { hex: '#9ACD32', name: 'Yellow Green' },
+  { hex: '#8FBC8F', name: 'Dark Sea Green' },
+  { hex: '#20B2AA', name: 'Light Sea Green' },
+  { hex: '#3CB371', name: 'Medium Sea Green' },
+  { hex: '#2E8B57', name: 'Sea Green' },
+  { hex: '#556B2F', name: 'Dark Olive Green' },
+  { hex: '#6B8E23', name: 'Olive Drab' },
+  { hex: '#808000', name: 'Olive' },
+  // Cyans & Teals
+  { hex: '#E0FFFF', name: 'Light Cyan' },
+  { hex: '#00CED1', name: 'Dark Turquoise' },
+  { hex: '#40E0D0', name: 'Turquoise' },
+  { hex: '#48D1CC', name: 'Medium Turquoise' },
+  { hex: '#008B8B', name: 'Dark Cyan' },
+  { hex: '#008080', name: 'Teal' },
   // Blues
-  { name: 'Azul Marinho', hex: '#000080' },
-  { name: 'Azul Cobalto', hex: '#0047AB' },
-  { name: 'Azul Aço', hex: '#4682B4' },
-  { name: 'Azul Bebê', hex: '#89CFF0' },
-  { name: 'Azul Céu', hex: '#87CEEB' },
-  { name: 'Azul Tiffany', hex: '#0ABAB5' },
+  { hex: '#87CEEB', name: 'Sky Blue' },
+  { hex: '#87CEFA', name: 'Light Sky Blue' },
+  { hex: '#00BFFF', name: 'Deep Sky Blue' },
+  { hex: '#B0C4DE', name: 'Light Steel Blue' },
+  { hex: '#1E90FF', name: 'Dodger Blue' },
+  { hex: '#6495ED', name: 'Cornflower Blue' },
+  { hex: '#4682B4', name: 'Steel Blue' },
+  { hex: '#4169E1', name: 'Royal Blue' },
+  { hex: '#0000CD', name: 'Medium Blue' },
+  { hex: '#00008B', name: 'Dark Blue' },
+  { hex: '#191970', name: 'Midnight Blue' },
   // Purples
-  { name: 'Roxo', hex: '#800080' },
-  { name: 'Ametista', hex: '#9966CC' },
-  { name: 'Lavanda', hex: '#E6E6FA' },
-  { name: 'Lilás', hex: '#C8A2C8' },
-  { name: 'Orquídea', hex: '#DA70D6' },
+  { hex: '#E6E6FA', name: 'Lavender' },
+  { hex: '#D8BFD8', name: 'Thistle' },
+  { hex: '#DDA0DD', name: 'Plum' },
+  { hex: '#EE82EE', name: 'Violet' },
+  { hex: '#DA70D6', name: 'Orchid' },
+  { hex: '#BA55D3', name: 'Medium Orchid' },
+  { hex: '#9370DB', name: 'Medium Purple' },
+  { hex: '#8A2BE2', name: 'Blue Violet' },
+  { hex: '#9400D3', name: 'Dark Violet' },
+  { hex: '#9932CC', name: 'Dark Orchid' },
+  { hex: '#8B008B', name: 'Dark Magenta' },
+  { hex: '#4B0082', name: 'Indigo' },
+  { hex: '#6A5ACD', name: 'Slate Blue' },
+  { hex: '#483D8B', name: 'Dark Slate Blue' },
+  // Pinks
+  { hex: '#FFB6C1', name: 'Light Pink' },
+  { hex: '#FF69B4', name: 'Hot Pink' },
+  { hex: '#FF1493', name: 'Deep Pink' },
+  { hex: '#C71585', name: 'Medium Violet Red' },
+  { hex: '#DB7093', name: 'Pale Violet Red' },
   // Browns
-  { name: 'Marrom Café', hex: '#6F4E37' },
-  { name: 'Marrom Chocolate', hex: '#D2691E' },
-  { name: 'Sépia', hex: '#704214' },
-  { name: 'Caramelo', hex: '#AF6E4D' },
-  { name: 'Bronze', hex: '#CD7F32' },
-  { name: 'Bege', hex: '#F5F5DC' },
-  { name: 'Areia', hex: '#C2B280' },
+  { hex: '#FFF8DC', name: 'Cornsilk' },
+  { hex: '#FFEBCD', name: 'Blanched Almond' },
+  { hex: '#FFE4C4', name: 'Bisque' },
+  { hex: '#FFDEAD', name: 'Navajo White' },
+  { hex: '#F5DEB3', name: 'Wheat' },
+  { hex: '#DEB887', name: 'Burly Wood' },
+  { hex: '#D2B48C', name: 'Tan' },
+  { hex: '#BC8F8F', name: 'Rosy Brown' },
+  { hex: '#F4A460', name: 'Sandy Brown' },
+  { hex: '#DAA520', name: 'Goldenrod' },
+  { hex: '#B8860B', name: 'Dark Goldenrod' },
+  { hex: '#CD853F', name: 'Peru' },
+  { hex: '#D2691E', name: 'Chocolate' },
+  { hex: '#A0522D', name: 'Sienna' },
+  { hex: '#A52A2A', name: 'Brown' },
+  { hex: '#800000', name: 'Maroon' },
+  // Grays
+  { hex: '#DCDCDC', name: 'Gainsboro' },
+  { hex: '#D3D3D3', name: 'Light Gray' },
+  { hex: '#A9A9A9', name: 'Dark Gray' },
+  { hex: '#696969', name: 'Dim Gray' },
+  { hex: '#778899', name: 'Light Slate Gray' },
+  { hex: '#708090', name: 'Slate Gray' },
+  { hex: '#2F4F4F', name: 'Dark Slate Gray' },
+  // Whites & Creams
+  { hex: '#FFFAFA', name: 'Snow' },
+  { hex: '#F0FFF0', name: 'Honeydew' },
+  { hex: '#F5FFFA', name: 'Mint Cream' },
+  { hex: '#F0FFFF', name: 'Azure' },
+  { hex: '#F0F8FF', name: 'Alice Blue' },
+  { hex: '#F8F8FF', name: 'Ghost White' },
+  { hex: '#F5F5F5', name: 'White Smoke' },
+  { hex: '#FFF5EE', name: 'Seashell' },
+  { hex: '#F5F5DC', name: 'Beige' },
+  { hex: '#FDF5E6', name: 'Old Lace' },
+  { hex: '#FFFAF0', name: 'Floral White' },
+  { hex: '#FFFFF0', name: 'Ivory' },
+  { hex: '#FAEBD7', name: 'Antique White' },
+  { hex: '#FAF0E6', name: 'Linen' },
+  { hex: '#FFF0F5', name: 'Lavender Blush' },
+  { hex: '#FFE4E1', name: 'Misty Rose' },
 ]
 
-export const DEFAULT_SELECTED_COLORS = ['#000000', '#FFFFFF']
+/** Default algorithm for new projects */
+export const DEFAULT_ALGORITHM = 'simple-enhanced' as const

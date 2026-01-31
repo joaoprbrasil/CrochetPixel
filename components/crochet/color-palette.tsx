@@ -1,6 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import { useLanguage } from '@/lib/i18n'
 import type { ColorEntry } from '@/lib/types'
 import { isLightColor } from '@/lib/utils/color'
 
@@ -23,10 +24,12 @@ export function ColorPalette({
   onDeselectAll,
   onToggleAdvanced,
 }: ColorPaletteProps) {
+  const { dict } = useLanguage()
+  
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h2 className="text-2xl font-bold text-pink-700">3. Selecione as cores</h2>
+        <h2 className="text-2xl font-bold text-pink-700">{dict.steps.selectColors}</h2>
         <label className="flex cursor-pointer select-none items-center gap-2">
           <input
             type="checkbox"
@@ -34,26 +37,26 @@ export function ColorPalette({
             onChange={(e) => onToggleAdvanced(e.target.checked)}
             className="size-[18px] cursor-pointer accent-pink-500"
           />
-          <span className="text-sm font-semibold text-pink-900">Modo avançado</span>
+          <span className="text-sm font-semibold text-pink-900">{dict.colorPalette.advancedMode}</span>
         </label>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm font-medium text-muted-foreground">
-          {selectedColors.length} {selectedColors.length === 1 ? 'cor selecionada' : 'cores selecionadas'}
+          {selectedColors.length} {selectedColors.length === 1 ? dict.colorPalette.colorSelected : dict.colorPalette.colorsSelected}
         </p>
         <div className="flex gap-2">
           <button
             onClick={onSelectAll}
             className="rounded-lg bg-pink-500 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-pink-600"
           >
-            Selecionar todas
+            {dict.colorPalette.selectAll}
           </button>
           <button
             onClick={onDeselectAll}
             className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-600 transition-all hover:bg-gray-200"
           >
-            Limpar
+            {dict.colorPalette.clear}
           </button>
         </div>
       </div>

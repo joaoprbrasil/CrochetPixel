@@ -1,6 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import { useLanguage } from '@/lib/i18n'
 
 interface GenerateButtonProps {
   onClick: () => void
@@ -9,6 +10,8 @@ interface GenerateButtonProps {
 }
 
 export function GenerateButton({ onClick, disabled, isGenerating }: GenerateButtonProps) {
+  const { dict } = useLanguage()
+  
   return (
     <button
       onClick={onClick}
@@ -23,12 +26,12 @@ export function GenerateButton({ onClick, disabled, isGenerating }: GenerateButt
       {isGenerating ? (
         <>
           <span className="size-5 animate-spin rounded-full border-3 border-white/30 border-t-white" />
-          Gerando...
+          {dict.generateButton.generating}
         </>
       ) : (
         <>
           <span>✨</span>
-          Gerar Gráfico de Crochê
+          {dict.generateButton.generate}
         </>
       )}
     </button>

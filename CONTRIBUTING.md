@@ -9,7 +9,7 @@ The following is a set of guidelines for contributing to CrochetPixel. These are
 1.  **Fork the repository** on GitHub.
 2.  **Clone your fork** locally:
     ```bash
-    git clone [https://github.com/YOUR_USERNAME/crochet-pixel.git](https://github.com/YOUR_USERNAME/crochet-pixel.git)
+    git clone [https://github.com/joaoprbrasil/crochet-pixel.git](https://github.com/joaoprbrasil/crochet-pixel.git)
     cd crochet-pixel
     ```
 3.  **Install dependencies**:

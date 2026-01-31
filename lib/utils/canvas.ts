@@ -1,72 +1,86 @@
-import { BLOCK_SIZE } from '@/lib/constants'
+import { hexToRgb, rgbToHex, findClosestColor } from './color'
 
-/** Load image from URL */
-export async function loadImage(url: string): Promise<HTMLImageElement> {
+export interface ProcessOptions {
+  width: number
+  height: number
+  palette: string[]
+}
+
+/**
+ * Loads an image from a URL and returns an ImageData object
+ */
+export async function loadImageData(
+  imageUrl: string,
+  targetWidth: number,
+  targetHeight: number
+): Promise<ImageData> {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.crossOrigin = 'anonymous'
-    img.onload = () => resolve(img)
-    img.onerror = reject
-    img.src = url
+    
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = targetWidth
+      canvas.height = targetHeight
+      const ctx = canvas.getContext('2d')
+      
+      if (!ctx) {
+        reject(new Error('Could not get canvas context'))
+        return
+      }
+      
+      ctx.drawImage(img, 0, 0, targetWidth, targetHeight)
+      resolve(ctx.getImageData(0, 0, targetWidth, targetHeight))
+    }
+    
+    img.onerror = () => reject(new Error('Failed to load image'))
+    img.src = imageUrl
   })
 }
 
-/** Create resized canvas with image */
-export function createResizedCanvas(
-  img: HTMLImageElement,
-  width: number,
-  height: number
-): { ctx: CanvasRenderingContext2D; imageData: ImageData } {
-  const canvas = document.createElement('canvas')
-  canvas.width = width
-  canvas.height = height
-  
-  const ctx = canvas.getContext('2d', { willReadFrequently: true })
-  if (!ctx) throw new Error('Failed to get canvas context')
-  
-  ctx.drawImage(img, 0, 0, width, height)
-  const imageData = ctx.getImageData(0, 0, width, height)
-  
-  return { ctx, imageData }
-}
-
-/** Render pixelated blocks to canvas */
-export function renderBlocksToCanvas(
-  ctx: CanvasRenderingContext2D,
-  pixels: Uint8ClampedArray,
-  width: number,
-  height: number,
-  blockSize: number = BLOCK_SIZE
+/**
+ * Creates a pixelated crochet chart from image data
+ */
+export function createCrochetChart(
+  canvas: HTMLCanvasElement,
+  imageData: ImageData,
+  palette: string[],
+  blockSize: number = 10
 ): void {
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
+
+  const { width, height, data } = imageData
+  
+  canvas.width = width * blockSize
+  canvas.height = height * blockSize
+  
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      const idx = (y * width + x) * 4
-
-      if (pixels[idx + 3] < 10) {
-        ctx.fillStyle = '#ffffff'
-      } else {
-        ctx.fillStyle = `rgb(${pixels[idx]}, ${pixels[idx + 1]}, ${pixels[idx + 2]})`
-      }
-
+      const i = (y * width + x) * 4
+      const r = data[i]
+      const g = data[i + 1]
+      const b = data[i + 2]
+      
+      const pixelHex = rgbToHex(r, g, b)
+      const closestColor = findClosestColor(pixelHex, palette)
+      
+      ctx.fillStyle = closestColor
       ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize)
       
-      // Grid lines
-      ctx.strokeStyle = 'rgba(0,0,0,0.15)'
-      ctx.lineWidth = 0.5
+      // Draw grid lines
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)'
       ctx.strokeRect(x * blockSize, y * blockSize, blockSize, blockSize)
     }
   }
 }
 
-/** Convert canvas to PNG data URL */
-export function canvasToDataUrl(canvas: HTMLCanvasElement): string {
-  return canvas.toDataURL('image/png')
-}
-
-/** Download data URL as file */
-export function downloadDataUrl(dataUrl: string, filename: string): void {
+/**
+ * Downloads the canvas as a PNG image
+ */
+export function downloadCanvas(canvas: HTMLCanvasElement, filename: string): void {
   const link = document.createElement('a')
   link.download = filename
-  link.href = dataUrl
+  link.href = canvas.toDataURL('image/png')
   link.click()
 }

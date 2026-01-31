@@ -1,94 +1,94 @@
 'use client'
 
-import { useState, useCallback, useRef, useMemo } from 'react'
+import { useState, useRef, useCallback, useMemo } from 'react'
 import type { ConversionAlgorithm } from '@/lib/types'
 import {
   DEFAULT_WIDTH,
   DEFAULT_HEIGHT,
   DEFAULT_ALGORITHM,
-  DEFAULT_SELECTED_COLORS,
-  BASIC_PALETTE,
-  ADVANCED_PALETTE,
-  BLOCK_SIZE,
+  BASIC_COLORS,
+  ADVANCED_COLORS,
 } from '@/lib/constants'
-import { applyAlgorithm } from '@/lib/algorithms'
-import { loadImage, createResizedCanvas, renderBlocksToCanvas, canvasToDataUrl, downloadDataUrl } from '@/lib/utils/canvas'
+import { loadImageData, createCrochetChart, downloadCanvas } from '@/lib/utils/canvas'
+import { processImage } from '@/lib/algorithms'
 
 export function useCrochetGenerator() {
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [width, setWidth] = useState(DEFAULT_WIDTH)
   const [height, setHeight] = useState(DEFAULT_HEIGHT)
-  const [selectedPalette, setSelectedPalette] = useState<string[]>(DEFAULT_SELECTED_COLORS)
   const [advancedMode, setAdvancedMode] = useState(false)
+  const [selectedPalette, setSelectedPalette] = useState<string[]>(
+    BASIC_COLORS.map(c => c.hex)
+  )
   const [algorithm, setAlgorithm] = useState<ConversionAlgorithm>(DEFAULT_ALGORITHM)
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedUrl, setGeneratedUrl] = useState<string | null>(null)
   
   const canvasRef = useRef<HTMLCanvasElement>(null)
-
-  const currentPalette = useMemo(
-    () => advancedMode ? [...BASIC_PALETTE, ...ADVANCED_PALETTE] : BASIC_PALETTE,
+  
+  const currentPalette = useMemo(() => 
+    advancedMode ? ADVANCED_COLORS : BASIC_COLORS,
     [advancedMode]
   )
-
-  const isValid = useMemo(
-    () => imageUrl && selectedPalette.length >= 2,
-    [imageUrl, selectedPalette.length]
+  
+  const isValid = useMemo(() => 
+    imageUrl !== null && selectedPalette.length > 0 && width > 0 && height > 0,
+    [imageUrl, selectedPalette, width, height]
   )
-
+  
   const toggleColor = useCallback((hex: string) => {
-    setSelectedPalette(prev => {
-      const isSelected = prev.includes(hex)
-      if (isSelected) {
-        return prev.length > 2 ? prev.filter(c => c !== hex) : prev
-      }
-      return [...prev, hex]
-    })
+    setSelectedPalette(prev => 
+      prev.includes(hex) 
+        ? prev.filter(c => c !== hex)
+        : [...prev, hex]
+    )
   }, [])
-
+  
   const selectAllColors = useCallback(() => {
     setSelectedPalette(currentPalette.map(c => c.hex))
   }, [currentPalette])
-
+  
   const deselectAllColors = useCallback(() => {
-    setSelectedPalette(DEFAULT_SELECTED_COLORS)
+    setSelectedPalette([])
   }, [])
-
+  
+  const handleAdvancedToggle = useCallback((enabled: boolean) => {
+    setAdvancedMode(enabled)
+    // Reset selection when switching modes
+    const newPalette = enabled ? ADVANCED_COLORS : BASIC_COLORS
+    setSelectedPalette(newPalette.map(c => c.hex))
+  }, [])
+  
   const generate = useCallback(async () => {
-    if (!imageUrl || !canvasRef.current || selectedPalette.length < 2) return
-
+    if (!imageUrl || !canvasRef.current || selectedPalette.length === 0) return
+    
     setIsGenerating(true)
-
+    
     try {
-      const img = await loadImage(imageUrl)
-      const { imageData } = createResizedCanvas(img, width, height)
+      // Load and resize image
+      const imageData = await loadImageData(imageUrl, width, height)
       
-      applyAlgorithm(algorithm, imageData.data, width, height, selectedPalette)
-
-      const canvas = canvasRef.current
-      canvas.width = width * BLOCK_SIZE
-      canvas.height = height * BLOCK_SIZE
-
-      const ctx = canvas.getContext('2d')
-      if (!ctx) throw new Error('Failed to get canvas context')
-
-      renderBlocksToCanvas(ctx, imageData.data, width, height)
-      setGeneratedUrl(canvasToDataUrl(canvas))
+      // Process with selected algorithm
+      const processed = processImage(imageData, algorithm, selectedPalette)
+      
+      // Draw to canvas
+      createCrochetChart(canvasRef.current, processed, selectedPalette)
+      
+      // Generate preview URL
+      setGeneratedUrl(canvasRef.current.toDataURL('image/png'))
     } catch (error) {
-      console.error('Generation error:', error)
+      console.error('Error generating chart:', error)
     } finally {
       setIsGenerating(false)
     }
   }, [imageUrl, width, height, algorithm, selectedPalette])
-
+  
   const download = useCallback(() => {
-    if (!generatedUrl) return
-    const timestamp = new Date().toISOString().slice(0, 10)
-    downloadDataUrl(generatedUrl, `crochet-${width}x${height}-${timestamp}.png`)
-  }, [generatedUrl, width, height])
-
+    if (!canvasRef.current) return
+    downloadCanvas(canvasRef.current, `crochet-chart-${width}x${height}.png`)
+  }, [width, height])
+  
   return {
-    // State
     imageUrl,
     width,
     height,
@@ -100,12 +100,11 @@ export function useCrochetGenerator() {
     canvasRef,
     isValid,
     currentPalette,
-    // Actions
     setImageUrl,
     setWidth,
     setHeight,
     setAlgorithm,
-    setAdvancedMode,
+    setAdvancedMode: handleAdvancedToggle,
     toggleColor,
     selectAllColors,
     deselectAllColors,

@@ -1,5 +1,6 @@
 'use client'
 
+import { useLanguage } from '@/lib/i18n'
 import { MIN_DIMENSION, MAX_DIMENSION } from '@/lib/constants'
 
 interface DimensionInputsProps {
@@ -10,12 +11,13 @@ interface DimensionInputsProps {
 }
 
 export function DimensionInputs({ width, height, onWidthChange, onHeightChange }: DimensionInputsProps) {
+  const { dict } = useLanguage()
   const inputClass = 'rounded-xl border-2 border-pink-300 p-3 text-center text-lg font-semibold text-pink-700 outline-none transition-all focus:border-pink-500 focus:ring-2 focus:ring-pink-200'
 
   return (
     <div className="flex items-center justify-center gap-6">
       <div className="flex min-w-[140px] flex-col gap-2">
-        <label className="text-sm font-semibold text-pink-900">Largura</label>
+        <label className="text-sm font-semibold text-pink-900">{dict.dimensions.width}</label>
         <input
           type="number"
           value={width}
@@ -24,13 +26,13 @@ export function DimensionInputs({ width, height, onWidthChange, onHeightChange }
           min={MIN_DIMENSION}
           max={MAX_DIMENSION}
         />
-        <span className="text-center text-xs text-muted-foreground">blocos</span>
+        <span className="text-center text-xs text-muted-foreground">{dict.dimensions.blocks}</span>
       </div>
 
       <div className="mt-5 text-3xl font-light text-pink-300">×</div>
 
       <div className="flex min-w-[140px] flex-col gap-2">
-        <label className="text-sm font-semibold text-pink-900">Altura</label>
+        <label className="text-sm font-semibold text-pink-900">{dict.dimensions.height}</label>
         <input
           type="number"
           value={height}
@@ -39,7 +41,7 @@ export function DimensionInputs({ width, height, onWidthChange, onHeightChange }
           min={MIN_DIMENSION}
           max={MAX_DIMENSION}
         />
-        <span className="text-center text-xs text-muted-foreground">blocos</span>
+        <span className="text-center text-xs text-muted-foreground">{dict.dimensions.blocks}</span>
       </div>
     </div>
   )

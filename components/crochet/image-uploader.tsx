@@ -2,6 +2,7 @@
 
 import { useState, useRef, type DragEvent, type ChangeEvent } from 'react'
 import { cn } from '@/lib/utils'
+import { useLanguage } from '@/lib/i18n'
 
 interface ImageUploaderProps {
   imageUrl: string | null
@@ -9,6 +10,7 @@ interface ImageUploaderProps {
 }
 
 export function ImageUploader({ imageUrl, onImageChange }: ImageUploaderProps) {
+  const { dict } = useLanguage()
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -48,16 +50,16 @@ export function ImageUploader({ imageUrl, onImageChange }: ImageUploaderProps) {
             className="mx-auto block max-h-[400px] max-w-full rounded-xl object-contain"
           />
           <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/60 opacity-0 transition-opacity hover:opacity-100">
-            <span className="text-lg font-semibold text-white">Clique para mudar</span>
+            <span className="text-lg font-semibold text-white">{dict.imageUploader.clickToChange}</span>
           </div>
         </div>
       ) : (
         <div className="py-5">
           <span className="mb-4 block text-6xl">📷</span>
           <p className="mb-2 text-xl font-semibold text-pink-700">
-            Clique ou arraste uma imagem
+            {dict.imageUploader.clickOrDrag}
           </p>
-          <p className="text-sm text-muted-foreground">PNG, JPG ou GIF</p>
+          <p className="text-sm text-muted-foreground">{dict.imageUploader.supportedFormats}</p>
         </div>
       )}
       <input

@@ -1,6 +1,7 @@
 'use client'
 
 import { useCrochetGenerator } from '@/hooks/use-crochet-generator'
+import { useLanguage } from '@/lib/i18n'
 import { Card } from './card'
 import { ImageUploader } from './image-uploader'
 import { DimensionInputs } from './dimension-inputs'
@@ -10,6 +11,7 @@ import { GenerateButton } from './generate-button'
 import { ResultDisplay } from './result-display'
 
 export function CrochetGenerator() {
+  const { dict } = useLanguage()
   const {
     imageUrl,
     width,
@@ -36,11 +38,11 @@ export function CrochetGenerator() {
 
   return (
     <main className="flex flex-col gap-6">
-      <Card title="1. Escolha sua imagem">
+      <Card title={dict.steps.chooseImage}>
         <ImageUploader imageUrl={imageUrl} onImageChange={setImageUrl} />
       </Card>
 
-      <Card title="2. Defina o tamanho">
+      <Card title={dict.steps.setSize}>
         <DimensionInputs
           width={width}
           height={height}

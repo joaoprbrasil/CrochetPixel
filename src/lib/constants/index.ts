@@ -1,0 +1,16 @@
+export {
+  BASIC_PALETTE,
+  ADVANCED_PALETTE,
+  DEFAULT_PALETTE,
+  MIN_COLORS,
+  MAX_COLORS,
+} from './palettes';
+
+export {
+  ALGORITHM_OPTIONS,
+  DEFAULT_WIDTH,
+  DEFAULT_HEIGHT,
+  MIN_DIMENSION,
+  MAX_DIMENSION,
+  PIXEL_SIZE,
+} from './algorithms';

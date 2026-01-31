@@ -1,0 +1,206 @@
+import type { ColorEntry } from '@/lib/types';
+
+/**
+ * Basic color palette for simple crochet patterns
+ * Contains 21 fundamental colors
+ */
+export const BASIC_PALETTE: ColorEntry[] = [
+  { name: "Branco", hex: "#FFFFFF" },
+  { name: "Preto", hex: "#000000" },
+  { name: "Cinza", hex: "#7F7F7F" },
+  { name: "Marrom", hex: "#804000" },
+  { name: "Vermelho", hex: "#FF0000" },
+  { name: "Vermelho Alaranjado", hex: "#FF5722" },
+  { name: "Laranja", hex: "#FF8000" },
+  { name: "Amarelo Alaranjado", hex: "#FFC107" },
+  { name: "Amarelo", hex: "#FFFF00" },
+  { name: "Verde Lima", hex: "#7FFF00" },
+  { name: "Verde Puro", hex: "#00FF00" },
+  { name: "Verde Amarelado", hex: "#8BC34A" },
+  { name: "Verde Primavera", hex: "#00FF80" },
+  { name: "Ciano / Aqua", hex: "#00FFFF" },
+  { name: "Azul Celeste", hex: "#007FFF" },
+  { name: "Azul", hex: "#0000FF" },
+  { name: "Azul Violeta", hex: "#3F51B5" },
+  { name: "Violeta Escuro", hex: "#7F00FF" },
+  { name: "Magenta / Fuchsia", hex: "#FF00FF" },
+  { name: "Rosa Choque", hex: "#FF0080" },
+  { name: "Vermelho Violeta", hex: "#AD1457" },
+];
+
+/**
+ * Advanced color palette with extensive shade variations
+ * Includes whites, grays, reds, pinks, oranges, yellows, greens, blues, purples, and browns
+ */
+export const ADVANCED_PALETTE: ColorEntry[] = [
+  // Tons de Branco e Cinza
+  { name: "Branco Neve", hex: "#FFFAFA" },
+  { name: "Branco Fantasma", hex: "#F8F8FF" },
+  { name: "Branco Floral", hex: "#FFFAF0" },
+  { name: "Marfim", hex: "#FFFFF0" },
+  { name: "Cinza Platina", hex: "#E5E4E2" },
+  { name: "Cinza Claro", hex: "#D3D3D3" },
+  { name: "Cinza Prata", hex: "#C0C0C0" },
+  { name: "Cinza Nevoeiro", hex: "#A9A9A9" },
+  { name: "Cinza Médio", hex: "#808080" },
+  { name: "Cinza Grafite", hex: "#5F5F5F" },
+  { name: "Cinza Escuro", hex: "#404040" },
+  { name: "Cinza Carvão", hex: "#36454F" },
+  { name: "Cinza Ardósia", hex: "#708090" },
+  { name: "Cinza Fumaça", hex: "#848884" },
+  
+  // Tons de Vermelho
+  { name: "Vermelho Vinho", hex: "#722F37" },
+  { name: "Vermelho Escuro", hex: "#8B0000" },
+  { name: "Bordô", hex: "#9B111E" },
+  { name: "Carmim", hex: "#DC143C" },
+  { name: "Vermelho Indiano", hex: "#CD5C5C" },
+  { name: "Vermelho Tijolo", hex: "#B22222" },
+  { name: "Vermelho Fogo", hex: "#E25822" },
+  { name: "Vermelho Tomate", hex: "#FF6347" },
+  { name: "Coral", hex: "#FF7F50" },
+  { name: "Coral Claro", hex: "#F08080" },
+  { name: "Salmão", hex: "#FA8072" },
+  { name: "Salmão Claro", hex: "#FFA07A" },
+  { name: "Salmão Escuro", hex: "#E9967A" },
+  { name: "Terracota", hex: "#E2725B" },
+  
+  // Tons de Rosa
+  { name: "Rosa Millennial", hex: "#F3CFC6" },
+  { name: "Rosa", hex: "#FFC0CB" },
+  { name: "Rosa Claro", hex: "#FFB6C1" },
+  { name: "Rosa Bebê", hex: "#F4C2C2" },
+  { name: "Rosa Pálido", hex: "#FADADD" },
+  { name: "Rosa Quente", hex: "#FF69B4" },
+  { name: "Rosa Profundo", hex: "#FF1493" },
+  { name: "Rosa Shocking", hex: "#FC0FC0" },
+  { name: "Rosa Fúcsia", hex: "#C74375" },
+  { name: "Rosa Antigo", hex: "#FAEBD7" },
+  { name: "Rosa Misty", hex: "#FFE4E1" },
+  { name: "Rosa Lavanda", hex: "#FFF0F5" },
+  
+  // Tons de Laranja
+  { name: "Laranja Queimado", hex: "#CC5500" },
+  { name: "Laranja Escuro", hex: "#FF8C00" },
+  { name: "Laranja Cenoura", hex: "#ED9121" },
+  { name: "Tangerina", hex: "#F28500" },
+  { name: "Laranja Abóbora", hex: "#FF7518" },
+  { name: "Coral Laranja", hex: "#FF6E4A" },
+  { name: "Pêssego", hex: "#FFDAB9" },
+  { name: "Pêssego Claro", hex: "#FFCBA4" },
+  { name: "Damasco", hex: "#FBCEB1" },
+  { name: "Melão", hex: "#FEBAAD" },
+  
+  // Tons de Amarelo
+  { name: "Amarelo Escuro", hex: "#B8860B" },
+  { name: "Ouro Escuro", hex: "#B8860B" },
+  { name: "Ouro", hex: "#FFD700" },
+  { name: "Amarelo Dourado", hex: "#FFDF00" },
+  { name: "Amarelo Canário", hex: "#FFEF00" },
+  { name: "Amarelo Limão", hex: "#FFFF33" },
+  { name: "Amarelo Claro", hex: "#FFFFE0" },
+  { name: "Creme", hex: "#FFFACD" },
+  { name: "Creme Claro", hex: "#FAFAD2" },
+  { name: "Mostarda", hex: "#FFDB58" },
+  { name: "Champanhe", hex: "#F7E7CE" },
+  { name: "Baunilha", hex: "#F3E5AB" },
+  
+  // Tons de Verde
+  { name: "Verde Garrafa", hex: "#006A4E" },
+  { name: "Verde Escuro", hex: "#006400" },
+  { name: "Verde Caçador", hex: "#355E3B" },
+  { name: "Verde Floresta", hex: "#228B22" },
+  { name: "Verde Grama", hex: "#7CFC00" },
+  { name: "Verde Chartreuse", hex: "#7FFF00" },
+  { name: "Verde Oliva", hex: "#808000" },
+  { name: "Verde Oliva Escuro", hex: "#556B2F" },
+  { name: "Verde Musgo", hex: "#8A9A5B" },
+  { name: "Verde Jade", hex: "#00A86B" },
+  { name: "Verde Esmeralda", hex: "#50C878" },
+  { name: "Verde Menta", hex: "#98FF98" },
+  { name: "Verde Menta Claro", hex: "#AAFFAA" },
+  { name: "Verde Água", hex: "#00FA9A" },
+  { name: "Verde Mar", hex: "#2E8B57" },
+  { name: "Verde Mar Claro", hex: "#20B2AA" },
+  { name: "Verde Mar Médio", hex: "#3CB371" },
+  { name: "Verde Abacate", hex: "#568203" },
+  { name: "Verde Pistache", hex: "#93C572" },
+  { name: "Turquesa", hex: "#40E0D0" },
+  { name: "Turquesa Escuro", hex: "#00CED1" },
+  { name: "Turquesa Médio", hex: "#48D1CC" },
+  
+  // Tons de Azul
+  { name: "Azul Meia-Noite", hex: "#191970" },
+  { name: "Azul Marinho", hex: "#000080" },
+  { name: "Azul Escuro", hex: "#00008B" },
+  { name: "Azul Médio", hex: "#0000CD" },
+  { name: "Azul Cobalto", hex: "#0047AB" },
+  { name: "Azul Real", hex: "#4169E1" },
+  { name: "Azul Elétrico", hex: "#7DF9FF" },
+  { name: "Azul Aço", hex: "#4682B4" },
+  { name: "Azul Cornflower", hex: "#6495ED" },
+  { name: "Azul Safira", hex: "#0F52BA" },
+  { name: "Azul Turquesa", hex: "#30D5C8" },
+  { name: "Azul Bebê", hex: "#89CFF0" },
+  { name: "Azul Claro", hex: "#ADD8E6" },
+  { name: "Azul Céu", hex: "#87CEEB" },
+  { name: "Azul Céu Claro", hex: "#87CEFA" },
+  { name: "Azul Powder", hex: "#B0E0E6" },
+  { name: "Azul Dodger", hex: "#1E90FF" },
+  { name: "Azul Alice", hex: "#F0F8FF" },
+  { name: "Azul Persa", hex: "#1C39BB" },
+  { name: "Azul Tiffany", hex: "#0ABAB5" },
+  
+  // Tons de Roxo/Violeta
+  { name: "Índigo Escuro", hex: "#310062" },
+  { name: "Índigo", hex: "#4B0082" },
+  { name: "Roxo Escuro", hex: "#301934" },
+  { name: "Roxo", hex: "#800080" },
+  { name: "Roxo Médio", hex: "#9370DB" },
+  { name: "Púrpura", hex: "#9370DB" },
+  { name: "Púrpura Médio", hex: "#9966CC" },
+  { name: "Ametista", hex: "#9966CC" },
+  { name: "Berinjela", hex: "#614051" },
+  { name: "Uva", hex: "#6F2DA8" },
+  { name: "Lavanda", hex: "#E6E6FA" },
+  { name: "Lavanda Floral", hex: "#B57EDC" },
+  { name: "Lilás", hex: "#C8A2C8" },
+  { name: "Malva", hex: "#E0B0FF" },
+  { name: "Violeta", hex: "#EE82EE" },
+  { name: "Orquídea", hex: "#DA70D6" },
+  { name: "Orquídea Média", hex: "#BA55D3" },
+  { name: "Ameixa", hex: "#DDA0DD" },
+  { name: "Magenta Escuro", hex: "#8B008B" },
+  
+  // Tons de Marrom
+  { name: "Marrom Café", hex: "#6F4E37" },
+  { name: "Marrom Chocolate", hex: "#D2691E" },
+  { name: "Marrom Cacau", hex: "#7B3F00" },
+  { name: "Marrom Saddle", hex: "#8B4513" },
+  { name: "Sépia", hex: "#704214" },
+  { name: "Siena", hex: "#A0522D" },
+  { name: "Siena Queimado", hex: "#E97451" },
+  { name: "Peru", hex: "#CD853F" },
+  { name: "Castanho", hex: "#8B4513" },
+  { name: "Caramelo", hex: "#AF6E4D" },
+  { name: "Bronze", hex: "#CD7F32" },
+  { name: "Cobre", hex: "#B87333" },
+  { name: "Ferrugem", hex: "#B7410E" },
+  { name: "Âmbar", hex: "#FFBF00" },
+  { name: "Tan", hex: "#D2B48C" },
+  { name: "Tan Escuro", hex: "#918151" },
+  { name: "Bege", hex: "#F5F5DC" },
+  { name: "Khaki", hex: "#C3B091" },
+  { name: "Khaki Escuro", hex: "#BDB76B" },
+  { name: "Trigo", hex: "#F5DEB3" },
+  { name: "Areia", hex: "#C2B280" },
+  { name: "Bisque", hex: "#FFE4C4" },
+];
+
+/** Combined palette with basic and advanced colors */
+export const DEFAULT_PALETTE: ColorEntry[] = [...BASIC_PALETTE, ...ADVANCED_PALETTE];
+
+/** Default selected colors for new projects */
+export const DEFAULT_SELECTED_COLORS = BASIC_PALETTE
+  .filter(c => c.name === "Preto" || c.name === "Branco")
+  .map(c => c.hex);

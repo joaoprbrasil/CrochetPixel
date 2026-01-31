@@ -1,5 +1,5 @@
-import { Header } from '@/components/crochet/header';
-import { CrochetGenerator } from '@/components/crochet/crochet-generator';
+import { Header } from '@/components/crochet/header'
+import { CrochetGenerator } from '@/components/crochet/crochet-generator'
 
 export default function Home() {
   return (
@@ -9,5 +9,5 @@ export default function Home() {
         <CrochetGenerator />
       </div>
     </div>
-  );
+  )
 }

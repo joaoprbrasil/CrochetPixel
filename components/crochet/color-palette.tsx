@@ -1,22 +1,19 @@
-'use client';
+'use client'
 
-import { cn } from '@/lib/utils';
-import type { ColorEntry } from '@/lib/types';
+import { cn } from '@/lib/utils'
+import type { ColorEntry } from '@/lib/types'
+import { isLightColor } from '@/lib/utils/color'
 
 interface ColorPaletteProps {
-  colors: ColorEntry[];
-  selectedColors: string[];
-  advancedMode: boolean;
-  onToggleColor: (hex: string) => void;
-  onSelectAll: () => void;
-  onDeselectAll: () => void;
-  onToggleAdvanced: (enabled: boolean) => void;
+  colors: ColorEntry[]
+  selectedColors: string[]
+  advancedMode: boolean
+  onToggleColor: (hex: string) => void
+  onSelectAll: () => void
+  onDeselectAll: () => void
+  onToggleAdvanced: (enabled: boolean) => void
 }
 
-/**
- * Color palette selection component
- * Displays grid of colors with selection state
- */
 export function ColorPalette({
   colors,
   selectedColors,
@@ -28,7 +25,6 @@ export function ColorPalette({
 }: ColorPaletteProps) {
   return (
     <div className="space-y-5">
-      {/* Header with advanced toggle */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h2 className="text-2xl font-bold text-pink-700">3. Selecione as cores</h2>
         <label className="flex cursor-pointer select-none items-center gap-2">
@@ -42,11 +38,9 @@ export function ColorPalette({
         </label>
       </div>
 
-      {/* Controls */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm font-medium text-muted-foreground">
-          {selectedColors.length}{' '}
-          {selectedColors.length === 1 ? 'cor selecionada' : 'cores selecionadas'}
+          {selectedColors.length} {selectedColors.length === 1 ? 'cor selecionada' : 'cores selecionadas'}
         </p>
         <div className="flex gap-2">
           <button
@@ -64,10 +58,9 @@ export function ColorPalette({
         </div>
       </div>
 
-      {/* Color grid */}
       <div className="grid grid-cols-[repeat(auto-fill,minmax(60px,1fr))] gap-3">
         {colors.map((color) => {
-          const isSelected = selectedColors.includes(color.hex);
+          const isSelected = selectedColors.includes(color.hex)
           return (
             <button
               key={color.hex}
@@ -93,18 +86,9 @@ export function ColorPalette({
                 </span>
               )}
             </button>
-          );
+          )
         })}
       </div>
     </div>
-  );
-}
-
-/** Determines if a hex color is light (for contrast) */
-function isLightColor(hex: string): boolean {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.5;
+  )
 }

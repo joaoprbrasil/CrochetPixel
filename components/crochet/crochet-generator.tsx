@@ -1,20 +1,14 @@
-'use client';
+'use client'
 
-import { useCrochetGenerator } from '@/hooks/use-crochet-generator';
-import {
-  ImageUploader,
-  DimensionInputs,
-  ColorPalette,
-  AlgorithmSelector,
-  GenerateButton,
-  ResultDisplay,
-  Card,
-} from '@/components/crochet';
+import { useCrochetGenerator } from '@/hooks/use-crochet-generator'
+import { Card } from './card'
+import { ImageUploader } from './image-uploader'
+import { DimensionInputs } from './dimension-inputs'
+import { ColorPalette } from './color-palette'
+import { AlgorithmSelector } from './algorithm-selector'
+import { GenerateButton } from './generate-button'
+import { ResultDisplay } from './result-display'
 
-/**
- * Main crochet pattern generator component
- * Orchestrates all sub-components and manages state through hook
- */
 export function CrochetGenerator() {
   const {
     imageUrl,
@@ -25,6 +19,9 @@ export function CrochetGenerator() {
     algorithm,
     isGenerating,
     generatedUrl,
+    canvasRef,
+    isValid,
+    currentPalette,
     setImageUrl,
     setWidth,
     setHeight,
@@ -35,19 +32,14 @@ export function CrochetGenerator() {
     deselectAllColors,
     generate,
     download,
-    canvasRef,
-    isValid,
-    currentPalette,
-  } = useCrochetGenerator();
+  } = useCrochetGenerator()
 
   return (
     <main className="flex flex-col gap-6">
-      {/* Image Upload */}
       <Card title="1. Escolha sua imagem">
         <ImageUploader imageUrl={imageUrl} onImageChange={setImageUrl} />
       </Card>
 
-      {/* Dimensions */}
       <Card title="2. Defina o tamanho">
         <DimensionInputs
           width={width}
@@ -57,7 +49,6 @@ export function CrochetGenerator() {
         />
       </Card>
 
-      {/* Color Palette */}
       <Card>
         <ColorPalette
           colors={currentPalette}
@@ -70,19 +61,16 @@ export function CrochetGenerator() {
         />
       </Card>
 
-      {/* Algorithm Selection */}
       <Card>
         <AlgorithmSelector selected={algorithm} onSelect={setAlgorithm} />
       </Card>
 
-      {/* Generate Button */}
       <GenerateButton
         onClick={generate}
         disabled={!isValid}
         isGenerating={isGenerating}
       />
 
-      {/* Result */}
       {generatedUrl && (
         <ResultDisplay
           imageUrl={generatedUrl}
@@ -92,8 +80,7 @@ export function CrochetGenerator() {
         />
       )}
 
-      {/* Hidden canvas for generation */}
       <canvas ref={canvasRef} className="hidden" />
     </main>
-  );
+  )
 }

@@ -1,142 +1,91 @@
-'use client';
+'use client'
 
-import React from "react"
-
-import { useState, useRef, useEffect, useCallback } from 'react';
-import type { ConversionAlgorithm } from '@/lib/types';
+import { useState, useCallback, useRef, useMemo } from 'react'
+import type { ConversionAlgorithm } from '@/lib/types'
 import {
   DEFAULT_WIDTH,
   DEFAULT_HEIGHT,
   DEFAULT_ALGORITHM,
   DEFAULT_SELECTED_COLORS,
   BASIC_PALETTE,
-  DEFAULT_PALETTE,
+  ADVANCED_PALETTE,
   BLOCK_SIZE,
-} from '@/lib/constants';
-import { loadImage, createResizedCanvas, renderBlocksToCanvas } from '@/lib/utils/canvas';
-import { applyAlgorithm } from '@/lib/algorithms';
+} from '@/lib/constants'
+import { applyAlgorithm } from '@/lib/algorithms'
+import { loadImage, createResizedCanvas, renderBlocksToCanvas, canvasToDataUrl, downloadDataUrl } from '@/lib/utils/canvas'
 
-export interface UseCrochetGeneratorReturn {
-  // State
-  imageUrl: string | null;
-  width: number;
-  height: number;
-  selectedPalette: string[];
-  advancedMode: boolean;
-  algorithm: ConversionAlgorithm;
-  isGenerating: boolean;
-  generatedUrl: string | null;
+export function useCrochetGenerator() {
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const [width, setWidth] = useState(DEFAULT_WIDTH)
+  const [height, setHeight] = useState(DEFAULT_HEIGHT)
+  const [selectedPalette, setSelectedPalette] = useState<string[]>(DEFAULT_SELECTED_COLORS)
+  const [advancedMode, setAdvancedMode] = useState(false)
+  const [algorithm, setAlgorithm] = useState<ConversionAlgorithm>(DEFAULT_ALGORITHM)
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [generatedUrl, setGeneratedUrl] = useState<string | null>(null)
   
-  // Actions
-  setImageUrl: (url: string | null) => void;
-  setWidth: (width: number) => void;
-  setHeight: (height: number) => void;
-  setAlgorithm: (algorithm: ConversionAlgorithm) => void;
-  setAdvancedMode: (mode: boolean) => void;
-  toggleColor: (hex: string) => void;
-  selectAllColors: () => void;
-  deselectAllColors: () => void;
-  generate: () => Promise<void>;
-  download: () => void;
-  
-  // Refs
-  canvasRef: React.RefObject<HTMLCanvasElement | null>;
-  
-  // Computed
-  isValid: boolean;
-  currentPalette: typeof BASIC_PALETTE;
-}
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
-/**
- * Main hook for crochet pattern generation
- * Encapsulates all state and logic for the generator
- */
-export function useCrochetGenerator(): UseCrochetGeneratorReturn {
-  // State
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [width, setWidth] = useState(DEFAULT_WIDTH);
-  const [height, setHeight] = useState(DEFAULT_HEIGHT);
-  const [selectedPalette, setSelectedPalette] = useState<string[]>(DEFAULT_SELECTED_COLORS);
-  const [advancedMode, setAdvancedMode] = useState(false);
-  const [algorithm, setAlgorithm] = useState<ConversionAlgorithm>(DEFAULT_ALGORITHM);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
+  const currentPalette = useMemo(
+    () => advancedMode ? [...BASIC_PALETTE, ...ADVANCED_PALETTE] : BASIC_PALETTE,
+    [advancedMode]
+  )
 
-  // Refs
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isValid = useMemo(
+    () => imageUrl && selectedPalette.length >= 2,
+    [imageUrl, selectedPalette.length]
+  )
 
-  // Cleanup URL on unmount or change
-  useEffect(() => {
-    return () => {
-      if (imageUrl) URL.revokeObjectURL(imageUrl);
-    };
-  }, [imageUrl]);
-
-  // Color management
   const toggleColor = useCallback((hex: string) => {
-    setSelectedPalette(prev =>
-      prev.includes(hex)
-        ? prev.filter(h => h !== hex)
-        : [...prev, hex]
-    );
-  }, []);
+    setSelectedPalette(prev => {
+      const isSelected = prev.includes(hex)
+      if (isSelected) {
+        return prev.length > 2 ? prev.filter(c => c !== hex) : prev
+      }
+      return [...prev, hex]
+    })
+  }, [])
 
   const selectAllColors = useCallback(() => {
-    const palette = advancedMode ? DEFAULT_PALETTE : BASIC_PALETTE;
-    setSelectedPalette(palette.map(c => c.hex));
-  }, [advancedMode]);
+    setSelectedPalette(currentPalette.map(c => c.hex))
+  }, [currentPalette])
 
   const deselectAllColors = useCallback(() => {
-    setSelectedPalette([]);
-  }, []);
+    setSelectedPalette(DEFAULT_SELECTED_COLORS)
+  }, [])
 
-  // Generation
   const generate = useCallback(async () => {
-    if (!imageUrl || !canvasRef.current || selectedPalette.length === 0) return;
+    if (!imageUrl || !canvasRef.current || selectedPalette.length < 2) return
 
-    setIsGenerating(true);
-    setGeneratedUrl(null);
+    setIsGenerating(true)
 
     try {
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d', { willReadFrequently: true });
-      if (!ctx) return;
+      const img = await loadImage(imageUrl)
+      const { imageData } = createResizedCanvas(img, width, height)
+      
+      applyAlgorithm(algorithm, imageData.data, width, height, selectedPalette)
 
-      const img = await loadImage(imageUrl);
+      const canvas = canvasRef.current
+      canvas.width = width * BLOCK_SIZE
+      canvas.height = height * BLOCK_SIZE
 
-      canvas.width = width * BLOCK_SIZE;
-      canvas.height = height * BLOCK_SIZE;
+      const ctx = canvas.getContext('2d')
+      if (!ctx) throw new Error('Failed to get canvas context')
 
-      const { imageData } = createResizedCanvas(img, width, height);
-      const pixels = imageData.data;
-
-      // Apply selected algorithm
-      applyAlgorithm(algorithm, pixels, width, height, selectedPalette);
-
-      // Render to canvas
-      renderBlocksToCanvas(ctx, pixels, width, height);
-
-      setGeneratedUrl(canvas.toDataURL('image/png'));
+      renderBlocksToCanvas(ctx, imageData.data, width, height)
+      setGeneratedUrl(canvasToDataUrl(canvas))
     } catch (error) {
-      console.error('Generation failed:', error);
+      console.error('Generation error:', error)
     } finally {
-      setIsGenerating(false);
+      setIsGenerating(false)
     }
-  }, [imageUrl, width, height, selectedPalette, algorithm]);
+  }, [imageUrl, width, height, algorithm, selectedPalette])
 
-  // Download
   const download = useCallback(() => {
-    if (!generatedUrl) return;
-
-    const link = document.createElement('a');
-    link.download = `grafico-croche-${width}x${height}.png`;
-    link.href = generatedUrl;
-    link.click();
-  }, [generatedUrl, width, height]);
-
-  // Computed
-  const isValid = !!imageUrl && selectedPalette.length > 0 && !isGenerating;
-  const currentPalette = advancedMode ? DEFAULT_PALETTE : BASIC_PALETTE;
+    if (!generatedUrl) return
+    const timestamp = new Date().toISOString().slice(0, 10)
+    downloadDataUrl(generatedUrl, `crochet-${width}x${height}-${timestamp}.png`)
+  }, [generatedUrl, width, height])
 
   return {
     // State
@@ -148,7 +97,9 @@ export function useCrochetGenerator(): UseCrochetGeneratorReturn {
     algorithm,
     isGenerating,
     generatedUrl,
-    
+    canvasRef,
+    isValid,
+    currentPalette,
     // Actions
     setImageUrl,
     setWidth,
@@ -160,12 +111,5 @@ export function useCrochetGenerator(): UseCrochetGeneratorReturn {
     deselectAllColors,
     generate,
     download,
-    
-    // Refs
-    canvasRef,
-    
-    // Computed
-    isValid,
-    currentPalette,
-  };
+  }
 }

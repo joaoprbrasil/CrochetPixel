@@ -1,21 +1,14 @@
-'use client';
+'use client'
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils'
 
 interface GenerateButtonProps {
-  onClick: () => void;
-  disabled: boolean;
-  isGenerating: boolean;
+  onClick: () => void
+  disabled: boolean
+  isGenerating: boolean
 }
 
-/**
- * Main generation button with loading state
- */
-export function GenerateButton({
-  onClick,
-  disabled,
-  isGenerating,
-}: GenerateButtonProps) {
+export function GenerateButton({ onClick, disabled, isGenerating }: GenerateButtonProps) {
   return (
     <button
       onClick={onClick}
@@ -39,5 +32,5 @@ export function GenerateButton({
         </>
       )}
     </button>
-  );
+  )
 }

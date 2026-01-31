@@ -1,23 +1,17 @@
-'use client';
+'use client'
 
-import { MIN_DIMENSION, MAX_DIMENSION } from '@/lib/constants';
+import { MIN_DIMENSION, MAX_DIMENSION } from '@/lib/constants'
 
 interface DimensionInputsProps {
-  width: number;
-  height: number;
-  onWidthChange: (width: number) => void;
-  onHeightChange: (height: number) => void;
+  width: number
+  height: number
+  onWidthChange: (width: number) => void
+  onHeightChange: (height: number) => void
 }
 
-/**
- * Width and height input controls
- */
-export function DimensionInputs({
-  width,
-  height,
-  onWidthChange,
-  onHeightChange,
-}: DimensionInputsProps) {
+export function DimensionInputs({ width, height, onWidthChange, onHeightChange }: DimensionInputsProps) {
+  const inputClass = 'rounded-xl border-2 border-pink-300 p-3 text-center text-lg font-semibold text-pink-700 outline-none transition-all focus:border-pink-500 focus:ring-2 focus:ring-pink-200'
+
   return (
     <div className="flex items-center justify-center gap-6">
       <div className="flex min-w-[140px] flex-col gap-2">
@@ -26,7 +20,7 @@ export function DimensionInputs({
           type="number"
           value={width}
           onChange={(e) => onWidthChange(Number(e.target.value))}
-          className="rounded-xl border-2 border-pink-300 p-3 text-center text-lg font-semibold text-pink-700 outline-none transition-all focus:border-pink-500 focus:ring-2 focus:ring-pink-200"
+          className={inputClass}
           min={MIN_DIMENSION}
           max={MAX_DIMENSION}
         />
@@ -41,12 +35,12 @@ export function DimensionInputs({
           type="number"
           value={height}
           onChange={(e) => onHeightChange(Number(e.target.value))}
-          className="rounded-xl border-2 border-pink-300 p-3 text-center text-lg font-semibold text-pink-700 outline-none transition-all focus:border-pink-500 focus:ring-2 focus:ring-pink-200"
+          className={inputClass}
           min={MIN_DIMENSION}
           max={MAX_DIMENSION}
         />
         <span className="text-center text-xs text-muted-foreground">blocos</span>
       </div>
     </div>
-  );
+  )
 }

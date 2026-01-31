@@ -1,6 +1,3 @@
-/**
- * Application header with logo and title
- */
 export function Header() {
   return (
     <header className="mb-10 pt-5 text-center">
@@ -16,5 +13,5 @@ export function Header() {
         Transforme suas fotos em gráficos de crochê
       </p>
     </header>
-  );
+  )
 }

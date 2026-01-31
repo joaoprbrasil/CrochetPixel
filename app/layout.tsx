@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   icons: {
     icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' fontSize='90'>🧶</text></svg>",
   },
-    generator: 'v0.app'
+  generator: 'v0.app',
 }
 
 export default function RootLayout({

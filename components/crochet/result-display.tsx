@@ -1,21 +1,13 @@
-'use client';
+'use client'
 
 interface ResultDisplayProps {
-  imageUrl: string;
-  width: number;
-  height: number;
-  onDownload: () => void;
+  imageUrl: string
+  width: number
+  height: number
+  onDownload: () => void
 }
 
-/**
- * Displays generated result with download button
- */
-export function ResultDisplay({
-  imageUrl,
-  width,
-  height,
-  onDownload,
-}: ResultDisplayProps) {
+export function ResultDisplay({ imageUrl, width, height, onDownload }: ResultDisplayProps) {
   return (
     <div className="rounded-2xl bg-white p-8 text-center shadow-lg">
       <h2 className="mb-6 text-2xl font-bold text-emerald-600">
@@ -38,5 +30,5 @@ export function ResultDisplay({
         Baixar Gráfico ({width}×{height})
       </button>
     </div>
-  );
+  )
 }
